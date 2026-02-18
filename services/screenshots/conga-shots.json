@@ -1,0 +1,44 @@
+[
+  {
+    "name": "01-dashboard",
+    "url": "/",
+    "description": "Conga Advantage Platform main dashboard after login",
+    "fullPage": false
+  },
+  {
+    "name": "02-admin-menu",
+    "url": "/admin",
+    "description": "Admin/Settings area navigation",
+    "fullPage": false
+  },
+  {
+    "name": "03-platform-setup",
+    "url": "/admin/platform-setup",
+    "description": "Platform Setup section in Admin",
+    "fullPage": false
+  },
+  {
+    "name": "04-integration-users",
+    "url": "/admin/platform-setup/integration-users",
+    "description": "Integration Users listing page",
+    "fullPage": false
+  },
+  {
+    "name": "05-create-integration-user",
+    "url": "/admin/platform-setup/integration-users/new",
+    "description": "Create new Integration User form",
+    "fullPage": false
+  },
+  {
+    "name": "06-api-connections",
+    "url": "/admin/platform-setup/api-connections",
+    "description": "API Connections / OAuth settings page",
+    "fullPage": false
+  },
+  {
+    "name": "07-client-credentials",
+    "url": "/admin/platform-setup/api-connections/details",
+    "description": "Client ID and Client Secret display page",
+    "fullPage": false
+  }
+]

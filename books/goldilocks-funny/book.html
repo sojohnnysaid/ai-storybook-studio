@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Goldilocks and the Three Bears: Home Security Edition</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Patrick+Hand&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&family=Cinzel+Decorative:wght@400;700;900&family=Bangers&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --color-gold:          #D4A03C;
+  --color-gold-light:    #F5E6B8;
+  --color-gold-dark:     #8B6914;
+  --color-forest:        #2D5A27;
+  --color-forest-light:  #4A8C3F;
+  --color-cream:         #FFF8E7;
+  --color-cream-dark:    #F5ECD4;
+  --color-brown:         #6B3A2A;
+  --color-brown-light:   #A0674B;
+  --color-sky:           #7BAFD4;
+  --color-sky-light:     #D4E8F5;
+  --color-rose:          #D4737A;
+  --color-rose-light:    #F5D4D7;
+  --color-red-alert:     #CC3333;
+  --color-police-blue:   #1B3A6B;
+  --color-text:          #3A2A1A;
+  --color-text-light:    #6B5A4A;
+  --color-white:         #FFFFFF;
+  --color-overlay-light: rgba(255, 248, 231, 0.88);
+  --color-overlay-gold:  rgba(212, 160, 60, 0.12);
+
+  --font-title:     'Cinzel Decorative', 'Playfair Display', serif;
+  --font-heading:   'Playfair Display', Georgia, serif;
+  --font-narration: 'Crimson Text', 'Georgia', serif;
+  --font-dialogue:  'Patrick Hand', 'Comic Sans MS', cursive;
+  --font-whimsy:    'Caveat', cursive;
+  --font-display:   'Amatic SC', cursive;
+  --font-action:    'Bangers', cursive;
+
+  --page-width:  8.5in;
+  --page-height: 11in;
+}
+
+/* ============================================================
+   PAGED MEDIA
+   ============================================================ */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
+}
+
+@page :left {
+  @bottom-left {
+    content: counter(page);
+    font-family: var(--font-whimsy);
+    font-size: 11pt;
+    color: var(--color-brown-light);
+    margin-left: 0.75in;
+    margin-bottom: 0.4in;
+  }
+}
+
+@page :right {
+  @bottom-right {
+    content: counter(page);
+    font-family: var(--font-whimsy);
+    font-size: 11pt;
+    color: var(--color-brown-light);
+    margin-right: 0.75in;
+    margin-bottom: 0.4in;
+  }
+}
+
+@page cover  { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page title  { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page ending { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 12pt; }
+body {
+  font-family: var(--font-narration);
+  color: var(--color-text);
+  line-height: 1.65;
+}
+
+/* ============================================================
+   PAGE STRUCTURE
+   ============================================================ */
+.page {
+  width: var(--page-width);
+  height: var(--page-height);
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  page-break-inside: avoid;
+}
+.page:last-child { page-break-after: auto; }
+
+.page-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0.75in;
+  z-index: 1;
+}
+
+.page-bg-texture {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('images/forest_bg_texture.png');
+  background-size: cover;
+  opacity: 0.06;
+  z-index: 0;
+}
+
+/* ============================================================
+   COVER
+   ============================================================ */
+.page--cover { page: cover; background: var(--color-brown); }
+
+.cover-image {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.cover-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.05) 0%, rgba(0,0,0,0) 30%,
+    rgba(0,0,0,0) 50%, rgba(0,0,0,0.4) 80%, rgba(0,0,0,0.7) 100%
+  );
+  z-index: 1;
+}
+
+.cover-title-block {
+  position: absolute;
+  bottom: 0.8in;
+  left: 0; right: 0;
+  text-align: center;
+  z-index: 2;
+  padding: 0 0.5in;
+}
+
+.cover-title {
+  font-family: var(--font-title);
+  font-size: 30pt;
+  font-weight: 900;
+  color: var(--color-gold-light);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6), 0 0 30px rgba(212,160,60,0.3);
+  line-height: 1.15;
+  margin-bottom: 0.1in;
+}
+
+.cover-subtitle {
+  font-family: var(--font-action);
+  font-size: 18pt;
+  color: var(--color-red-alert);
+  text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  letter-spacing: 0.06em;
+  background: rgba(0,0,0,0.3);
+  display: inline-block;
+  padding: 0.04in 0.2in;
+  border-radius: 0.04in;
+}
+
+/* ============================================================
+   TITLE PAGE
+   ============================================================ */
+.page--title { page: title; background: var(--color-cream); }
+
+.title-page-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 1in;
+}
+
+.title-ornament {
+  width: 2in; height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+}
+
+.title-main {
+  font-family: var(--font-title);
+  font-size: 26pt;
+  font-weight: 700;
+  color: var(--color-brown);
+  line-height: 1.2;
+  margin: 0.3in 0 0.05in;
+}
+
+.title-edition {
+  font-family: var(--font-action);
+  font-size: 16pt;
+  color: var(--color-red-alert);
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4in;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.narration {
+  font-family: var(--font-narration);
+  font-size: 13pt;
+  line-height: 1.7;
+  color: var(--color-text);
+  text-align: justify;
+  hyphens: auto;
+}
+.narration p { margin-bottom: 0.15in; text-indent: 0.3in; }
+.narration p:first-child { text-indent: 0; }
+
+.drop-cap::first-letter {
+  font-family: var(--font-title);
+  font-size: 52pt;
+  float: left;
+  line-height: 0.8;
+  padding-right: 0.08in;
+  padding-top: 0.06in;
+  color: var(--color-gold-dark);
+}
+
+.dialogue {
+  font-family: var(--font-dialogue);
+  font-size: 14.5pt;
+  line-height: 1.5;
+  color: var(--color-brown);
+  margin: 0.12in 0;
+  padding-left: 0.2in;
+  text-indent: 0 !important;
+}
+
+.dialogue--papa { font-size: 17pt; color: var(--color-brown); }
+.dialogue--mama { font-size: 15pt; color: var(--color-rose); }
+.dialogue--baby { font-size: 13pt; color: var(--color-forest-light); }
+.dialogue--goldilocks { font-size: 15pt; color: var(--color-gold-dark); }
+.dialogue--police { font-size: 14pt; color: var(--color-police-blue); }
+
+.dialogue-speaker {
+  font-family: var(--font-whimsy);
+  font-size: 10pt;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.02in;
+}
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 28pt;
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  text-align: center;
+  margin-bottom: 0.2in;
+  letter-spacing: 0.04em;
+}
+
+/* Action/dramatic headings */
+.action-heading {
+  font-family: var(--font-action);
+  font-size: 32pt;
+  color: var(--color-red-alert);
+  text-align: center;
+  margin-bottom: 0.2in;
+  letter-spacing: 0.02em;
+}
+
+/* Sound effects */
+.sfx {
+  font-family: var(--font-action);
+  font-size: 20pt;
+  color: var(--color-red-alert);
+  display: inline;
+}
+
+/* ============================================================
+   IMAGE TREATMENTS
+   ============================================================ */
+.img-panoramic {
+  width: 100%;
+  height: 3.5in;
+  object-fit: cover;
+  border-radius: 0.06in;
+  margin: 0.15in 0;
+}
+
+.img-hero {
+  display: block;
+  max-width: 100%;
+  margin: 0.15in auto;
+  border-radius: 0.1in;
+  box-shadow: 0 4px 16px rgba(59,42,26,0.15);
+}
+
+.img-float-right {
+  float: right;
+  width: 3.2in;
+  margin: 0 0 0.15in 0.25in;
+  border-radius: 0.08in;
+}
+
+.img-float-left {
+  float: left;
+  width: 3.2in;
+  margin: 0 0.25in 0.15in 0;
+  border-radius: 0.08in;
+}
+
+/* ============================================================
+   DECORATIVE
+   ============================================================ */
+.ornament-divider {
+  text-align: center;
+  margin: 0.2in 0;
+  color: var(--color-gold);
+  font-size: 14pt;
+  letter-spacing: 0.3em;
+}
+
+.gold-rule {
+  border: none;
+  height: 1.5px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin: 0.2in 0;
+}
+
+/* Camera recording indicator */
+.rec-indicator {
+  font-family: var(--font-action);
+  font-size: 10pt;
+  color: var(--color-red-alert);
+  letter-spacing: 0.15em;
+  text-align: right;
+  margin-bottom: 0.05in;
+  opacity: 0.7;
+}
+
+/* Layout: image with overlay text */
+.layout-image-with-overlay {
+  position: relative;
+  height: 100%;
+}
+.layout-image-with-overlay img {
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  object-fit: cover;
+}
+.layout-image-with-overlay .text-panel {
+  position: absolute;
+  background: var(--color-overlay-light);
+  border-radius: 0.15in;
+  padding: 0.3in;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+/* The End */
+.the-end {
+  font-family: var(--font-title);
+  font-size: 36pt;
+  color: var(--color-gold-dark);
+  margin-bottom: 0.3in;
+}
+
+/* SVG ornament */
+.ornament-svg { color: var(--color-gold); }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PAGE 1: COVER
+     ============================================================ -->
+<div class="page page--cover">
+  <!-- SVG defs inside cover to avoid blank page -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="blob-clip" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0.02 C0.7,0.02 0.88,0.08 0.95,0.22 C1.02,0.38 0.98,0.58 0.95,0.72 C0.9,0.88 0.75,0.98 0.5,0.98 C0.25,0.98 0.1,0.88 0.05,0.72 C0.02,0.58 -0.02,0.38 0.05,0.22 C0.12,0.08 0.3,0.02 0.5,0.02Z"/>
+      </clipPath>
+      <symbol id="ornament-swirl" viewBox="0 0 200 20">
+        <path d="M0,10 Q25,0 50,10 Q75,20 100,10 Q125,0 150,10 Q175,20 200,10"
+              fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="100" cy="10" r="3" fill="currentColor" opacity="0.4"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <img class="cover-image" src="images/cover.png" alt="Goldilocks approaches a security-camera-laden cottage">
+  <div class="cover-overlay"></div>
+  <div class="cover-title-block">
+    <h1 class="cover-title">Goldilocks<br>&amp; the<br>Three Bears</h1>
+    <p class="cover-subtitle">Home Security Edition</p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 2: TITLE PAGE
+     ============================================================ -->
+<div class="page page--title">
+  <div class="title-page-inner">
+    <div class="title-ornament"></div>
+
+    <h2 class="title-main">
+      Goldilocks &amp; the Three Bears
+    </h2>
+    <p class="title-edition">Home Security Edition</p>
+
+    <div style="text-align: center;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="4in" height="4in">
+        <defs>
+          <radialGradient id="title-fg" cx="300" cy="300" r="240" gradientUnits="userSpaceOnUse">
+            <stop offset="0.50" stop-color="white"/>
+            <stop offset="0.72" stop-color="white" stop-opacity="0.65"/>
+            <stop offset="0.88" stop-color="white" stop-opacity="0.15"/>
+            <stop offset="1.0" stop-color="white" stop-opacity="0"/>
+          </radialGradient>
+          <mask id="title-feather" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600">
+            <circle cx="300" cy="300" r="240" fill="url(#title-fg)"/>
+          </mask>
+        </defs>
+        <image href="images/title_vignette.png" x="0" y="0" width="600" height="600"
+               preserveAspectRatio="xMidYMid slice" mask="url(#title-feather)"/>
+      </svg>
+    </div>
+
+    <div class="title-ornament" style="margin-top: 0.2in;"></div>
+    <p style="font-family: var(--font-whimsy); font-size: 11pt; color: var(--color-text-light); margin-top: 0.2in;">
+      A cautionary tale about home invasion<br>and the importance of good locks
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3: MEET THE BEARS (TECH EDITION)
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="section-heading">Meet the Bears</div>
+    <svg viewBox="0 0 200 20" style="display:block; width:1.5in; height:0.15in; color:var(--color-gold); margin: 0 auto 0.2in;">
+      <use href="#ornament-swirl"/>
+    </svg>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3in; align-items: start;">
+      <div class="narration">
+        <p class="drop-cap">Once upon a time, in a cozy cottage deep in the woods, there lived three bears. But these were no ordinary bears. These were <em>smart</em> bears. <em>Prepared</em> bears. Bears who had read every online review for every home security system on the market.</p>
+
+        <p>There was great big <strong>Papa Bear</strong>, who worked in cybersecurity and took home defense <em>very</em> seriously. There was <strong>Mama Bear</strong>, who had a concealed-carry permit and could field-strip a water pistol in under thirty seconds. And there was wee little <strong>Baby Bear</strong>, who mostly just wanted to watch cartoons.</p>
+
+        <p>Their cottage had fourteen security cameras, motion-activated floodlights, a smart doorbell with facial recognition, and a Wi-Fi network so powerful that birds avoided flying over the house.</p>
+      </div>
+
+      <div>
+        <img src="images/smart_home_bears.png" alt="The tech-savvy bear family"
+             style="width: 100%; border-radius: 0.15in; box-shadow: 0 6px 24px rgba(59,42,26,0.18);">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4: MORNING PORRIDGE & TECH
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="rec-indicator">&bull; REC</div>
+
+    <img src="images/kitchen_cameras.png" alt="High-tech bear kitchen"
+         class="img-panoramic" style="margin-top: 0; margin-bottom: 0.2in; border-radius: 0.12in;">
+
+    <div class="narration">
+      <p>One morning, Mama Bear made a big pot of porridge &mdash; organic, locally sourced, fair-trade oats &mdash; and ladled it into three bowls.</p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;This porridge is too hot. Let&rsquo;s go for a walk while it cools. I&rsquo;ll monitor the house from my phone.&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--mama">
+        <span class="dialogue-speaker">Mama Bear</span>
+        &ldquo;Honey, we live in the middle of a forest. Who&rsquo;s going to break in?&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;That&rsquo;s EXACTLY what someone with no security system would say.&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--baby">
+        <span class="dialogue-speaker">Baby Bear</span>
+        &ldquo;Can I bring my scooter?&rdquo;
+      </p>
+
+      <p>And so the three bears headed out for a walk, Papa Bear clutching his phone like a lifeline, checking the security feeds every forty-five seconds.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5: THE WALK / PAPA'S PARANOIA
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <img src="images/papa_phone_walk.png" alt="Bears walking, Papa glued to his phone"
+         class="img-hero"
+         style="width: 100%; height: 3.2in; object-fit: cover; border-radius: 0.12in; margin-bottom: 0.2in;">
+
+    <div class="narration">
+      <p>Papa Bear couldn&rsquo;t relax. Every squirrel that crossed the yard triggered a notification. Every gust of wind that rattled the smart doorbell sent him into high alert.</p>
+
+      <p class="dialogue dialogue--mama">
+        <span class="dialogue-speaker">Mama Bear</span>
+        &ldquo;Would you put that phone away? You&rsquo;re going to walk into a tree.&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;That&rsquo;s what the trees WANT you to think.&rdquo;
+      </p>
+
+      <p>Baby Bear picked dandelions. Mama Bear took deep, calming breaths. Papa Bear zoomed in on a suspicious-looking mushroom.</p>
+
+      <p>And then&hellip;</p>
+    </div>
+
+    <hr class="gold-rule">
+
+    <div style="text-align: center; margin-top: 0.15in;">
+      <span style="font-family: var(--font-whimsy); font-size: 14pt; color: var(--color-text-light);">
+        <em>Meanwhile, on a nearby forest path&hellip;</em>
+      </span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6: PHONE ALERT / GOLDILOCKS ENTERS
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="action-heading">INTRUDER ALERT!</div>
+
+    <div style="display: grid; grid-template-columns: 3in 1fr; gap: 0.2in; align-items: start;">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" width="3in" height="3.9in">
+          <defs>
+            <mask id="alert-feather" maskUnits="userSpaceOnUse" x="0" y="0" width="400" height="520">
+              <radialGradient id="alert-fg" cx="200" cy="260" rx="170" ry="220" gradientUnits="userSpaceOnUse">
+                <stop offset="0.55" stop-color="white"/>
+                <stop offset="0.78" stop-color="white" stop-opacity="0.6"/>
+                <stop offset="0.92" stop-color="white" stop-opacity="0.1"/>
+                <stop offset="1.0" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+              <ellipse cx="200" cy="260" rx="170" ry="220" fill="url(#alert-fg)"/>
+            </mask>
+          </defs>
+          <image href="images/phone_alert.png" x="0" y="0" width="400" height="520"
+                 preserveAspectRatio="xMidYMid slice" mask="url(#alert-feather)"/>
+        </svg>
+      </div>
+      <div class="narration">
+        <p>Papa Bear&rsquo;s phone exploded with notifications.</p>
+
+        <p style="text-indent: 0; font-family: var(--font-action); font-size: 13pt; color: var(--color-red-alert); line-height: 1.6; margin: 0.1in 0;">
+          MOTION DETECTED &mdash; FRONT DOOR<br>
+          MOTION DETECTED &mdash; KITCHEN<br>
+          MOTION DETECTED &mdash; LIVING ROOM<br>
+          UNKNOWN FACE DETECTED<br>
+          PORRIDGE TAMPER ALERT
+        </p>
+
+        <p class="dialogue dialogue--papa">
+          <span class="dialogue-speaker">Papa Bear</span>
+          &ldquo;I KNEW IT! I KNEW THIS WOULD HAPPEN! THERE&rsquo;S SOMEONE IN OUR HOUSE!&rdquo;
+        </p>
+
+        <p>He fumbled for his phone, paws shaking, and dialed 911.</p>
+
+        <p class="dialogue dialogue--papa">
+          <span class="dialogue-speaker">Papa Bear</span>
+          &ldquo;Forest Police? I&rsquo;d like to report a BREAK-IN. Yes, I have it on fourteen cameras. FOURTEEN.&rdquo;
+        </p>
+
+        <p>Then he called Mama Bear.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: "GET STRAPPED" / MAMA BEAR ARMS UP
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="section-heading">The Call</div>
+
+    <div class="narration">
+      <p>Now, what Papa Bear didn&rsquo;t know was that Mama Bear and Baby Bear had turned back early. Baby Bear had gotten a pebble in his shoe and Mama didn&rsquo;t feel like dealing with the whining. They were already home &mdash; upstairs in the bedroom &mdash; when Papa&rsquo;s call came through.</p>
+
+      <p>Mama Bear&rsquo;s phone buzzed. She answered.</p>
+
+      <p class="dialogue dialogue--papa" style="font-size: 19pt; text-align: center;">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;There&rsquo;s an intruder downstairs. GET STRAPPED.&rdquo;
+      </p>
+
+      <p>Mama Bear&rsquo;s eyes went wide. Then they went narrow. Then they went <em>full mama bear</em>.</p>
+    </div>
+
+    <div style="text-align: center; margin: 0.15in 0;">
+      <img src="images/mama_gun_locker.png" alt="Mama Bear opens the tactical locker"
+           style="width: 5in; border-radius: 0.15in; box-shadow: 0 6px 24px rgba(59,42,26,0.2);">
+    </div>
+
+    <div class="narration" style="text-align: center;">
+      <p style="text-indent: 0;">She walked to the bedroom closet, pressed her paw to the biometric scanner, and the <em>BearVault 3000</em> slid open with a dramatic hiss.</p>
+
+      <p style="text-indent: 0;" class="dialogue dialogue--mama">
+        &ldquo;Baby Bear, stay in your room. Mama&rsquo;s got this.&rdquo;
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8: MEANWHILE, GOLDILOCKS IS HAVING THE TIME OF HER LIFE
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div style="text-align: center; margin-bottom: 0.15in;">
+      <span style="font-family: var(--font-whimsy); font-size: 16pt; color: var(--color-text-light);">
+        &#10043; &#10043; &#10043;
+      </span><br>
+      <em style="font-family: var(--font-whimsy); font-size: 16pt; color: var(--color-brown);">
+        Meanwhile, downstairs&hellip;
+      </em><br>
+      <span style="font-family: var(--font-whimsy); font-size: 16pt; color: var(--color-text-light);">
+        &#10043; &#10043; &#10043;
+      </span>
+    </div>
+
+    <div class="rec-indicator">&bull; REC &mdash; KITCHEN CAM 03</div>
+
+    <img src="images/goldilocks_oblivious.png" alt="Goldilocks happily entering the cottage"
+         class="img-float-left"
+         style="width: 3in; border-radius: 0.12in;">
+
+    <div class="narration">
+      <p>Goldilocks was having the absolute best day of her life.</p>
+
+      <p>She had wandered into the most darling little cottage, and nobody seemed to be home! How fun! What an adventure!</p>
+
+      <p>She did not notice the fourteen security cameras. She did not notice the blinking red lights. She did not notice the motion-sensor floodlight that had turned on so bright you could see it from space.</p>
+
+      <p>She tried Papa Bear&rsquo;s porridge.</p>
+
+      <p class="dialogue dialogue--goldilocks">
+        &ldquo;Too hot!&rdquo;
+      </p>
+
+      <p>She tried Mama Bear&rsquo;s porridge.</p>
+
+      <p class="dialogue dialogue--goldilocks">
+        &ldquo;Too cold!&rdquo;
+      </p>
+
+      <p>She tried Baby Bear&rsquo;s porridge.</p>
+
+      <p class="dialogue dialogue--goldilocks" style="font-size: 17pt;">
+        &ldquo;Mmmmm! Just right!&rdquo;
+      </p>
+
+      <p>She ate every last bite, completely unaware that she was being filmed from four different angles.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9: THE CHAIRS
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="rec-indicator">&bull; REC &mdash; LIVING ROOM CAM 07</div>
+
+    <div class="section-heading">The Three Chairs</div>
+
+    <div class="narration">
+      <p>With a full tummy and not a care in the world, Goldilocks bounced into the living room.</p>
+
+      <p>She tried Papa Bear&rsquo;s enormous recliner.</p>
+
+      <p class="dialogue dialogue--goldilocks">&ldquo;Too hard! And why does it have a cup holder for binoculars?&rdquo;</p>
+
+      <p>She tried Mama Bear&rsquo;s chair.</p>
+
+      <p class="dialogue dialogue--goldilocks">&ldquo;Too soft! But this throw blanket is divine.&rdquo;</p>
+
+      <p>She tried Baby Bear&rsquo;s wee little chair.</p>
+
+      <p class="dialogue dialogue--goldilocks" style="font-size: 17pt;">&ldquo;Just right!&rdquo;</p>
+    </div>
+
+    <div style="text-align: center; margin: 0.1in 0;">
+      <img src="images/chair_breaks_camera.png" alt="The chair breaks while cameras record everything"
+           style="width: 3.4in; clip-path: url(#blob-clip);">
+    </div>
+
+    <div class="narration" style="text-align: center;">
+      <p style="text-indent: 0;"><span class="sfx">CRACK! SNAP! CRASH!</span></p>
+      <p style="text-indent: 0;">The chair exploded into splinters. Goldilocks tumbled to the floor, giggled, brushed herself off, and headed upstairs.</p>
+      <p style="text-indent: 0; font-family: var(--font-whimsy); font-size: 11pt; color: var(--color-text-light);">
+        <em>Camera 07 captured the whole thing in stunning 4K.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 10: GOLDILOCKS MEETS BABY BEAR
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="section-heading">An Unexpected Guest</div>
+
+    <div class="narration">
+      <p>Goldilocks skipped upstairs, tried Papa Bear&rsquo;s bed (<em>&ldquo;Too hard!&rdquo;</em>), tried Mama Bear&rsquo;s bed (<em>&ldquo;Too soft!&rdquo;</em>), and then opened the door to Baby Bear&rsquo;s room.</p>
+
+      <p>And there, sitting on his little bed in his pajamas, clutching his teddy bear with eyes the size of dinner plates, was Baby Bear.</p>
+    </div>
+
+    <div style="text-align: center; margin: 0.15in 0;">
+      <img src="images/hello_baby_bear.png" alt="Goldilocks delightedly meets Baby Bear"
+           style="width: 5in; border-radius: 0.15in; box-shadow: 0 6px 24px rgba(59,42,26,0.18);">
+    </div>
+
+    <div class="narration" style="text-align: center;">
+      <p class="dialogue dialogue--goldilocks" style="font-size: 18pt; text-align: center;">
+        &ldquo;OH MY GOODNESS! Hello! You are SO CUTE!&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--baby" style="text-align: center;">
+        <span class="dialogue-speaker">Baby Bear</span>
+        &ldquo;M-m-mama&hellip;?&rdquo;
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 11: MAMA BEAR ENTERS - FREEZE!
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content" style="padding: 0;">
+    <div class="layout-image-with-overlay">
+      <img src="images/mama_freeze.png" alt="Mama Bear confronts Goldilocks">
+
+      <div class="text-panel" style="bottom: 0.4in; left: 0.5in; right: 0.5in;">
+        <div class="action-heading" style="margin-bottom: 0.1in; font-size: 38pt;">FREEZE!</div>
+
+        <div class="narration" style="font-size: 12.5pt; text-align: center;">
+          <p style="text-indent: 0;">From behind came a voice that could freeze lava.</p>
+
+          <p class="dialogue dialogue--mama" style="font-size: 20pt; text-align: center;">
+            &ldquo;HANDS UP. DON&rsquo;T. MOVE.&rdquo;
+          </p>
+
+          <p style="text-indent: 0;">Goldilocks turned around slowly. There stood Mama Bear in the doorway, feet planted wide, looking like she had just stepped out of an action movie &mdash; if action movies starred bears in cozy sweaters.</p>
+
+          <p class="dialogue dialogue--goldilocks" style="text-align: center;">
+            &ldquo;Oh! Um&hellip; this isn&rsquo;t what it looks like?&rdquo;
+          </p>
+
+          <p class="dialogue dialogue--mama" style="text-align: center;">
+            &ldquo;It looks like you ate my son&rsquo;s porridge, broke his chair, and now you&rsquo;re in his bedroom. That&rsquo;s EXACTLY what it looks like.&rdquo;
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 12: OUTSIDE - PAPA AND THE POLICE
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="action-heading">BUSTED!</div>
+
+    <img src="images/outside_arrest.png" alt="Papa Bear and the Forest Police outside"
+         class="img-panoramic"
+         style="height: 3.8in; border-radius: 0.15in; box-shadow: 0 6px 24px rgba(59,42,26,0.15); margin-bottom: 0.2in;">
+
+    <div class="narration">
+      <p>By the time Mama Bear marched Goldilocks downstairs with her hands up, Papa Bear had arrived with backup.</p>
+
+      <p>And what backup it was.</p>
+
+      <p><strong>Officer Peppy Le Stink</strong> of the Forest Police Department stood at attention by the front door, adjusting his badge with great dignity. His partner, <strong>Officer Buck Chompsworth</strong>, a beaver of considerable girth, was already scribbling furiously in a tiny notepad.</p>
+
+      <p class="dialogue dialogue--police">
+        <span class="dialogue-speaker">Officer Chompsworth</span>
+        &ldquo;So let me get this straight. She ate the porridge. She broke the chair. And she was found in the minor&rsquo;s bedroom?&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--papa" style="font-size: 18pt;">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;AND I HAVE IT ALL ON CAMERA!&rdquo;
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 13: THE ARREST
+     ============================================================ -->
+<div class="page page--story" style="background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div class="section-heading">Read Her Her Rights</div>
+    <svg viewBox="0 0 200 20" style="display:block; width:1.5in; height:0.15in; color:var(--color-gold); margin: 0 auto 0.15in;">
+      <use href="#ornament-swirl"/>
+    </svg>
+
+    <img src="images/handcuffs_departure.png" alt="Goldilocks escorted to police car in handcuffs"
+         class="img-panoramic"
+         style="height: 3.8in; border-radius: 0.15in; box-shadow: 0 6px 24px rgba(59,42,26,0.15); margin-bottom: 0.2in;">
+
+    <div class="narration">
+      <p>Officer Le Stink placed a pair of comically tiny handcuffs on Goldilocks and led her toward the Forest PD cruiser.</p>
+
+      <p class="dialogue dialogue--police">
+        <span class="dialogue-speaker">Officer Le Stink</span>
+        &ldquo;You have the right to remain silent. Anything you say can and will be used against you in a court of forest law.&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--goldilocks">
+        <span class="dialogue-speaker">Goldilocks</span>
+        &ldquo;But the door was unlocked!&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--police">
+        <span class="dialogue-speaker">Officer Chompsworth</span>
+        &ldquo;Ma&rsquo;am, that&rsquo;s not how property law works.&rdquo;
+      </p>
+
+      <p>Papa Bear waved from the porch, grinning like a bear who had just been proven right about everything, ever, in the history of being right.</p>
+
+      <p class="dialogue dialogue--mama">
+        <span class="dialogue-speaker">Mama Bear</span>
+        &ldquo;I will admit&hellip; the cameras were a good idea.&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;I&rsquo;m sorry, could you say that louder? For the recording?&rdquo;
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 14: THE END
+     ============================================================ -->
+<div class="page" style="page: ending; background: var(--color-cream);">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content" style="padding: 0;">
+    <div class="layout-image-with-overlay">
+      <img src="images/the_end.png" alt="Bears on porch watching police car drive away" style="opacity: 0.9;">
+
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                  background: linear-gradient(to bottom, rgba(255,248,231,0.3) 0%, rgba(255,248,231,0) 30%, rgba(255,248,231,0) 40%, rgba(255,248,231,0.85) 70%, rgba(255,248,231,1) 88%);
+                  z-index: 1;">
+      </div>
+
+      <div style="position: absolute; bottom: 0.8in; left: 0; right: 0; text-align: center; z-index: 2;">
+        <div class="the-end">The End</div>
+
+        <div style="max-width: 5in; margin: 0 auto;">
+          <div class="narration" style="text-align: center; font-style: italic; font-size: 12pt; color: var(--color-text-light);">
+            <p style="text-indent: 0;">The bears installed four more cameras that very afternoon. Baby Bear got a new chair &mdash; with a built-in alarm. And Goldilocks? She learned a very important lesson:</p>
+
+            <p style="text-indent: 0; font-family: var(--font-action); font-size: 16pt; color: var(--color-brown); margin-top: 0.1in;">
+              If it&rsquo;s not your house, don&rsquo;t go in.<br>
+              Especially if there are cameras.
+            </p>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.3in;">
+          <svg viewBox="0 0 200 20" style="width: 1.5in; height: 0.15in; color: var(--color-gold);">
+            <use href="#ornament-swirl"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 15: BACK COVER
+     ============================================================ -->
+<div class="page" style="page: cover; background: var(--color-cream-dark);">
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 2in;">
+
+    <p style="font-family: var(--font-action); font-size: 14pt; color: var(--color-red-alert); margin-bottom: 0.3in;">
+      PROTECTED BY BEARGUARD 3000
+    </p>
+
+    <p style="font-family: var(--font-narration); font-size: 10pt; color: var(--color-text-light); line-height: 1.8; max-width: 4in;">
+      <em>No porridge was permanently harmed in the making of this story. Baby Bear&rsquo;s chair was repaired under warranty. Goldilocks was released on bail and is currently attending a &ldquo;Respecting Boundaries&rdquo; workshop.</em>
+    </p>
+
+    <div style="margin-top: 0.3in;">
+      <svg viewBox="0 0 200 20" style="width: 1in; height: 0.12in; color: var(--color-gold);">
+        <use href="#ornament-swirl"/>
+      </svg>
+    </div>
+
+    <p style="font-family: var(--font-whimsy); font-size: 9pt; color: var(--color-text-light); margin-top: 0.3in; opacity: 0.6;">
+      Set in Cinzel Decorative, Playfair Display,<br>
+      Crimson Text, Patrick Hand, Bangers &amp; Caveat
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

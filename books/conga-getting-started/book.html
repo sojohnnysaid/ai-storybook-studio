@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Conga - Getting Started with APIs</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Patrick+Hand&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&family=Cinzel+Decorative:wght@400;700;900&family=Bangers&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --color-conga-blue:     #0052CC;
+  --color-conga-dark:     #172B4D;
+  --color-conga-light:    #DEEBFF;
+  --color-gold:           #D4A03C;
+  --color-gold-light:     #F5E6B8;
+  --color-gold-dark:      #8B6914;
+  --color-forest:         #2D5A27;
+  --color-cream:          #FFF8E7;
+  --color-cream-dark:     #F5ECD4;
+  --color-brown:          #6B3A2A;
+  --color-brown-light:    #A0674B;
+  --color-text:           #3A2A1A;
+  --color-text-light:     #6B5A4A;
+  --color-code-bg:        #F4F0E8;
+  --color-success:        #36B37E;
+  --color-warning:        #FFAB00;
+  --color-overlay-light:  rgba(255, 248, 231, 0.92);
+
+  --font-title:     'Cinzel Decorative', 'Playfair Display', serif;
+  --font-heading:   'Playfair Display', Georgia, serif;
+  --font-narration: 'Crimson Text', 'Georgia', serif;
+  --font-dialogue:  'Patrick Hand', cursive;
+  --font-whimsy:    'Caveat', cursive;
+  --font-display:   'Amatic SC', cursive;
+  --font-action:    'Bangers', cursive;
+  --font-code:      'Fira Code', monospace;
+}
+
+/* ============================================================
+   PAGED MEDIA
+   ============================================================ */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
+}
+@page :left {
+  @bottom-left {
+    content: counter(page);
+    font-family: var(--font-whimsy);
+    font-size: 11pt;
+    color: var(--color-brown-light);
+    margin-left: 0.75in;
+    margin-bottom: 0.4in;
+  }
+}
+@page :right {
+  @bottom-right {
+    content: counter(page);
+    font-family: var(--font-whimsy);
+    font-size: 11pt;
+    color: var(--color-brown-light);
+    margin-right: 0.75in;
+    margin-bottom: 0.4in;
+  }
+}
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page ending { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 12pt; }
+body {
+  font-family: var(--font-narration);
+  color: var(--color-text);
+  line-height: 1.65;
+}
+
+.page {
+  width: 8.5in;
+  height: 11in;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  page-break-inside: avoid;
+  background: var(--color-cream);
+}
+.page:last-child { page-break-after: auto; }
+
+.page-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0.65in 0.75in;
+  z-index: 1;
+}
+
+/* ============================================================
+   COVER
+   ============================================================ */
+.page--cover {
+  page: cover;
+  background: linear-gradient(135deg, #0052CC 0%, #172B4D 60%, #2D5A27 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cover-inner {
+  text-align: center;
+  padding: 1in;
+}
+
+.cover-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.12);
+  border: 2px solid rgba(255,255,255,0.25);
+  border-radius: 0.5in;
+  padding: 0.1in 0.3in;
+  font-family: var(--font-whimsy);
+  font-size: 12pt;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 0.4in;
+  letter-spacing: 0.08em;
+}
+
+.cover-title {
+  font-family: var(--font-title);
+  font-size: 38pt;
+  font-weight: 900;
+  color: var(--color-gold-light);
+  text-shadow: 0 3px 12px rgba(0,0,0,0.4);
+  line-height: 1.15;
+  margin-bottom: 0.15in;
+}
+
+.cover-subtitle {
+  font-family: var(--font-heading);
+  font-size: 16pt;
+  font-weight: 400;
+  color: rgba(255,255,255,0.85);
+  font-style: italic;
+  margin-bottom: 0.5in;
+}
+
+.cover-ornament {
+  width: 2.5in;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin: 0.3in auto;
+}
+
+.cover-tagline {
+  font-family: var(--font-dialogue);
+  font-size: 14pt;
+  color: var(--color-gold-light);
+  opacity: 0.8;
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.narration {
+  font-family: var(--font-narration);
+  font-size: 12.5pt;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+.narration p { margin-bottom: 0.12in; }
+
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 28pt;
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  text-align: center;
+  margin-bottom: 0.15in;
+}
+
+.step-heading {
+  font-family: var(--font-heading);
+  font-size: 16pt;
+  font-weight: 700;
+  color: var(--color-conga-dark);
+  margin-bottom: 0.12in;
+  display: flex;
+  align-items: center;
+  gap: 0.12in;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.36in;
+  height: 0.36in;
+  border-radius: 50%;
+  background: var(--color-conga-blue);
+  color: white;
+  font-family: var(--font-action);
+  font-size: 16pt;
+  flex-shrink: 0;
+}
+
+.narrator-aside {
+  font-family: var(--font-whimsy);
+  font-size: 13pt;
+  color: var(--color-brown-light);
+  font-style: italic;
+  text-align: center;
+  margin: 0.1in 0;
+}
+
+/* Breadcrumb path */
+.nav-path {
+  font-family: var(--font-code);
+  font-size: 10pt;
+  background: var(--color-conga-light);
+  color: var(--color-conga-dark);
+  padding: 0.08in 0.15in;
+  border-radius: 0.05in;
+  display: inline-block;
+  margin: 0.08in 0;
+  border-left: 3px solid var(--color-conga-blue);
+}
+
+/* Pro tip box */
+.pro-tip {
+  background: var(--color-gold-light);
+  border-radius: 0.08in;
+  padding: 0.15in 0.2in;
+  margin: 0.12in 0;
+  border-left: 4px solid var(--color-gold);
+}
+.pro-tip-label {
+  font-family: var(--font-action);
+  font-size: 11pt;
+  color: var(--color-gold-dark);
+  margin-bottom: 0.03in;
+}
+.pro-tip p {
+  font-family: var(--font-narration);
+  font-size: 11pt;
+  color: var(--color-brown);
+  margin: 0;
+}
+
+/* Warning box */
+.warning-box {
+  background: #FFF3E0;
+  border-radius: 0.08in;
+  padding: 0.15in 0.2in;
+  margin: 0.12in 0;
+  border-left: 4px solid #E65100;
+}
+.warning-box p { margin: 0; }
+.warning-label {
+  font-family: var(--font-action);
+  font-size: 11pt;
+  color: #E65100;
+  margin-bottom: 0.03in;
+}
+.warning-box .body {
+  font-family: var(--font-narration);
+  font-size: 11pt;
+  color: var(--color-brown);
+}
+
+/* Code blocks */
+.code-block {
+  background: var(--color-conga-dark);
+  color: #E8E6E3;
+  font-family: var(--font-code);
+  font-size: 9pt;
+  line-height: 1.6;
+  padding: 0.15in 0.2in;
+  border-radius: 0.06in;
+  margin: 0.1in 0;
+  overflow: hidden;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.code-block .c { color: #6B8A7A; }
+.code-block .s { color: #98C379; }
+.code-block .k { color: #61AFEF; }
+.code-block .v { color: #E5C07B; }
+
+code {
+  font-family: var(--font-code);
+  font-size: 10pt;
+  background: var(--color-code-bg);
+  padding: 0.01in 0.05in;
+  border-radius: 0.03in;
+  color: var(--color-conga-dark);
+}
+
+/* Screenshot container */
+.screenshot {
+  margin: 0.1in 0;
+  text-align: center;
+}
+.screenshot img {
+  max-width: 100%;
+  border: 1px solid #E0D8C8;
+  border-radius: 0.06in;
+  box-shadow: 0 3px 12px rgba(59,42,26,0.12);
+}
+.screenshot-caption {
+  font-family: var(--font-whimsy);
+  font-size: 10pt;
+  color: var(--color-text-light);
+  margin-top: 0.06in;
+}
+
+/* Screenshot placeholder (until real screenshots are captured) */
+.screenshot-placeholder {
+  background: var(--color-cream-dark);
+  border: 2px dashed var(--color-brown-light);
+  border-radius: 0.06in;
+  padding: 0.6in 0.3in;
+  text-align: center;
+  margin: 0.1in 0;
+}
+.screenshot-placeholder p {
+  font-family: var(--font-whimsy);
+  font-size: 12pt;
+  color: var(--color-brown-light);
+}
+
+/* Decorative */
+.gold-rule {
+  border: none;
+  height: 1.5px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin: 0.15in 0;
+}
+.ornament-divider {
+  text-align: center;
+  margin: 0.1in 0;
+  color: var(--color-gold);
+  font-size: 14pt;
+  letter-spacing: 0.3em;
+}
+
+/* Checklist */
+.checklist {
+  list-style: none;
+  padding: 0;
+  margin: 0.08in 0;
+}
+.checklist li {
+  font-family: var(--font-narration);
+  font-size: 12pt;
+  padding: 0.04in 0 0.04in 0.35in;
+  position: relative;
+  line-height: 1.5;
+}
+.checklist li::before {
+  content: '\2610';
+  position: absolute;
+  left: 0;
+  color: var(--color-conga-blue);
+  font-size: 13pt;
+}
+.checklist li.done::before {
+  content: '\2611';
+  color: var(--color-success);
+}
+
+/* Field table */
+.field-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.1in 0;
+  font-family: var(--font-narration);
+  font-size: 11pt;
+}
+.field-table th {
+  background: var(--color-conga-light);
+  color: var(--color-conga-dark);
+  font-weight: 700;
+  text-align: left;
+  padding: 0.06in 0.12in;
+  border: 1px solid #C1D7F0;
+}
+.field-table td {
+  padding: 0.06in 0.12in;
+  border: 1px solid #E0D8C8;
+  vertical-align: top;
+}
+.field-table tr:nth-child(even) td {
+  background: var(--color-cream-dark);
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PAGE 1: COVER
+     ============================================================ -->
+<div class="page page--cover">
+  <div class="cover-inner">
+    <div class="cover-badge">A Whimsical Technical Guide</div>
+
+    <h1 class="cover-title">Conga</h1>
+    <p class="cover-subtitle">Getting Started with APIs</p>
+
+    <div class="cover-ornament"></div>
+
+    <p class="cover-tagline">
+      A step-by-step adventure through<br>
+      Integration Users, Client IDs &amp; Secrets
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 2: TABLE OF CONTENTS / INTRO
+     ============================================================ -->
+<div class="page">
+  <div class="page-content" style="display: flex; flex-direction: column; justify-content: center;">
+    <div class="section-heading">Our Quest Today</div>
+    <hr class="gold-rule">
+
+    <p class="narrator-aside">
+      Every great API integration begins with a single login&hellip;
+    </p>
+
+    <div class="narration" style="margin-top: 0.15in;">
+      <p>Welcome, brave developer, to the enchanted realm of the <strong>Conga Advantage Platform</strong>. Today we embark on a noble quest: to create an <strong>Integration User</strong> and obtain the legendary <strong>Client ID</strong> and <strong>Client Secret</strong> &mdash; the twin keys that unlock the gates of API access.</p>
+
+      <p>Conga recommends the Integration User approach over API Connections for most use cases. Fear not! This guide shall be your faithful map.</p>
+    </div>
+
+    <div style="margin: 0.2in 0.5in;">
+      <p style="font-family: var(--font-heading); font-size: 13pt; color: var(--color-conga-dark); margin-bottom: 0.1in; font-weight: 700;">
+        Chapters of Our Adventure
+      </p>
+      <ul class="checklist">
+        <li><strong>Chapter 1</strong> &mdash; Open the App Launcher &amp; Enter the Admin Console</li>
+        <li><strong>Chapter 2</strong> &mdash; Navigate to the Users Page</li>
+        <li><strong>Chapter 3</strong> &mdash; Add a New Integration User</li>
+        <li><strong>Chapter 4</strong> &mdash; Save &amp; Capture Your Client ID &amp; Secret</li>
+        <li><strong>Chapter 5</strong> &mdash; Make Your First Authenticated API Call</li>
+      </ul>
+    </div>
+
+    <div class="pro-tip">
+      <div class="pro-tip-label">Before You Begin</div>
+      <p>You will need <strong>administrator access</strong> to the Conga Advantage Platform. If you don&rsquo;t have it, consult your friendly neighborhood platform admin.</p>
+    </div>
+
+    <div class="ornament-divider" style="margin-top: 0.2in;">&#10043;&ensp;&#10043;&ensp;&#10043;</div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3: CHAPTER 1 - APP LAUNCHER & ADMIN CONSOLE
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Chapter 1</div>
+    <div class="step-heading">
+      <span class="step-number">1</span>
+      Open the App Launcher &amp; Enter the Admin Console
+    </div>
+
+    <div class="narration">
+      <p>Log into your Conga environment and behold the dashboard &mdash; your home base. In the <strong>top-left corner</strong> of the screen, you&rsquo;ll find the <strong>App Launcher</strong> icon (it looks like a grid of dots).</p>
+
+      <p>Click it, and a menu of application cards appears. Each card is a <code>&lt;cc-card&gt;</code> web component &mdash; a portal to a different realm.</p>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/01-dashboard.png" alt="Conga Platform Dashboard with App Launcher">
+      <div class="screenshot-caption">The dashboard &mdash; click the App Launcher (grid icon) in the top-left</div>
+    </div>
+
+    <div class="narration">
+      <p>From the App Launcher menu, find and click the <strong>Admin Console</strong> card to enter the administration realm.</p>
+    </div>
+
+    <p class="narrator-aside">
+      Only those with admin powers may pass through these gates. Choose wisely!
+    </p>
+
+    <div class="pro-tip">
+      <div class="pro-tip-label">Playwright Tip</div>
+      <p>The App Launcher cards use Shadow DOM. Target a card by its <code>id</code> attribute on the <code>&lt;cc-card&gt;</code> element, then chain <code>.locator('a[href="/admin"]')</code> to reach the link inside the Shadow Root.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4: CHAPTER 2 - NAVIGATE TO USERS
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Chapter 2</div>
+    <div class="step-heading">
+      <span class="step-number">2</span>
+      Navigate to the Users Page
+    </div>
+
+    <div class="nav-path">App Launcher &rarr; Admin Console &rarr; Users</div>
+
+    <div class="narration" style="margin-top: 0.1in;">
+      <p>Inside the Admin Console, click <strong>Users</strong> in the left navigation panel. A list of all existing users will appear &mdash; human users, guest users, and any integration users that have already been created.</p>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/02-admin-users.png" alt="Admin Console Users page">
+      <div class="screenshot-caption">The Users page &mdash; your army of platform inhabitants</div>
+    </div>
+
+    <div class="narration">
+      <p>At the top of the user list, you&rsquo;ll see an <strong>Add</strong> button. That&rsquo;s our next destination.</p>
+
+      <p>You may also notice an <strong>Add Guest</strong> button nearby. That&rsquo;s for digital commerce guest users &mdash; not what we need today. Resist the temptation!</p>
+    </div>
+
+    <p class="narrator-aside">
+      So many users, so little time. Onward to creating our robot butler!
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5: CHAPTER 3 - ADD INTEGRATION USER
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Chapter 3</div>
+    <div class="step-heading">
+      <span class="step-number">3</span>
+      Add a New Integration User
+    </div>
+
+    <div class="nav-path">Admin Console &rarr; Users &rarr; Add</div>
+
+    <div class="narration" style="margin-top: 0.1in;">
+      <p>Click the <strong>Add</strong> button. The <strong>User Details</strong> form appears. This is where the magic happens.</p>
+
+      <p>Fill in the required fields, and &mdash; most importantly &mdash; set the <strong>User Type</strong> to <strong>Integration</strong>.</p>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/03-add-user-form.png" alt="Add User form with User Type dropdown">
+      <div class="screenshot-caption">The User Details form &mdash; set User Type to &ldquo;Integration&rdquo;</div>
+    </div>
+
+    <table class="field-table">
+      <thead>
+        <tr><th>Field</th><th>What to Enter</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>First Name</strong></td><td>A descriptive name (e.g., &ldquo;MyApp&rdquo;)</td></tr>
+        <tr><td><strong>Last Name</strong></td><td>Purpose identifier (e.g., &ldquo;Integration&rdquo;)</td></tr>
+        <tr><td><strong>Email</strong></td><td>An email address for the integration user</td></tr>
+        <tr><td><strong>Username</strong></td><td>Same as email (Conga recommends matching these)</td></tr>
+        <tr><td><strong>User Type</strong></td><td><strong>Integration</strong> &larr; This is the key!</td></tr>
+      </tbody>
+    </table>
+
+    <div class="pro-tip" style="margin-top: 0.1in;">
+      <div class="pro-tip-label">What is an Integration User?</div>
+      <p>An Integration user is a non-human system account designed for API access, data syncing, and third-party integrations. It authenticates via Client Credentials &mdash; no browser login required.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6: CHAPTER 4 - SAVE & GET CREDENTIALS
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Chapter 4</div>
+    <div class="step-heading">
+      <span class="step-number">4</span>
+      Save &amp; Capture Your Client ID &amp; Secret
+    </div>
+
+    <div class="narration">
+      <p>With the form filled out and User Type set to <strong>Integration</strong>, click the <strong>Save</strong> button.</p>
+
+      <p>A <strong>Credentials popup</strong> immediately appears, revealing the two sacred tokens:</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.15in; margin: 0.12in 0;">
+      <div style="background: var(--color-conga-light); border-radius: 0.08in; padding: 0.15in; text-align: center;">
+        <p style="font-family: var(--font-action); font-size: 13pt; color: var(--color-conga-blue); margin-bottom: 0.04in;">Client ID</p>
+        <p style="font-family: var(--font-narration); font-size: 10.5pt; color: var(--color-conga-dark);">Your application&rsquo;s public identity. Safe to store in config files and environment variables.</p>
+      </div>
+      <div style="background: #FFF3E0; border-radius: 0.08in; padding: 0.15in; text-align: center;">
+        <p style="font-family: var(--font-action); font-size: 13pt; color: #E65100; margin-bottom: 0.04in;">Client Secret</p>
+        <p style="font-family: var(--font-narration); font-size: 10.5pt; color: var(--color-conga-dark);">Your application&rsquo;s private password. Guard this with your life!</p>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/04-credentials-popup.png" alt="Credentials popup showing Client ID and Secret">
+      <div class="screenshot-caption">The Credentials popup &mdash; copy both values immediately!</div>
+    </div>
+
+    <div class="warning-box">
+      <p class="warning-label">Critical Warning!</p>
+      <p class="body">The <strong>Client Secret is shown only once</strong>. Once you dismiss this popup, the secret <em>cannot be recovered</em>. Copy it immediately and store it in a secrets manager or secure environment variable. If lost, navigate to the user&rsquo;s <strong>External Identifier</strong> link and click <strong>Save &amp; Regenerate Client Secret</strong>.</p>
+    </div>
+
+    <p class="narrator-aside">
+      Write it down! No, not on a sticky note. Somewhere actually secure.
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: CHAPTER 5 - FIRST API CALL
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Chapter 5</div>
+    <div class="step-heading">
+      <span class="step-number">5</span>
+      Make Your First Authenticated API Call
+    </div>
+
+    <div class="narration">
+      <p>With your Client ID and Secret in hand, you can now authenticate via the <strong>OAuth 2.0 Client Credentials</strong> flow.</p>
+    </div>
+
+    <p style="font-family: var(--font-heading); font-size: 12pt; font-weight: 700; color: var(--color-conga-dark); margin: 0.1in 0 0.06in;">
+      Step 5a &mdash; Request an Access Token
+    </p>
+
+    <div class="code-block"><span class="c"># Exchange credentials for an access token</span>
+curl -X POST <span class="s">https://login-rls.congacloud.com/api/v1/auth/connect/token</span> \
+  -H <span class="s">"Content-Type: application/x-www-form-urlencoded"</span> \
+  -d <span class="s">"client_id=<span class="v">$CLIENT_ID</span>"</span> \
+  -d <span class="s">"client_secret=<span class="v">$CLIENT_SECRET</span>"</span> \
+  -d <span class="s">"grant_type=<span class="v">client_credentials</span>"</span> \
+  -d <span class="s">"scope=<span class="v">sign</span>"</span></div>
+
+    <div class="narration">
+      <p>The <code>scope</code> parameter depends on which Conga API you&rsquo;re accessing:</p>
+    </div>
+
+    <table class="field-table" style="font-size: 10.5pt;">
+      <thead><tr><th>Scope</th><th>API</th></tr></thead>
+      <tbody>
+        <tr><td><code>sign</code></td><td>Conga Sign</td></tr>
+        <tr><td><code>doc-gen.composer</code></td><td>Conga Composer</td></tr>
+        <tr><td><code>clm</code></td><td>Conga CLM (Contract Lifecycle)</td></tr>
+      </tbody>
+    </table>
+
+    <p style="font-family: var(--font-heading); font-size: 12pt; font-weight: 700; color: var(--color-conga-dark); margin: 0.12in 0 0.06in;">
+      Step 5b &mdash; Response
+    </p>
+
+    <div class="code-block"><span class="c"># You'll receive:</span>
+{
+  <span class="k">"access_token"</span>: <span class="s">"eyJhbGciOiJSUzI1NiIs..."</span>,
+  <span class="k">"token_type"</span>: <span class="s">"Bearer"</span>,
+  <span class="k">"expires_in"</span>: <span class="v">3600</span>,
+  <span class="k">"scope"</span>: <span class="s">"sign"</span>
+}</div>
+
+    <p style="font-family: var(--font-heading); font-size: 12pt; font-weight: 700; color: var(--color-conga-dark); margin: 0.12in 0 0.06in;">
+      Step 5c &mdash; Call the API
+    </p>
+
+    <div class="code-block"><span class="c"># Use the Bearer token in subsequent requests</span>
+curl <span class="s">https://api.congacloud.com/v1/your-endpoint</span> \
+  -H <span class="s">"Authorization: Bearer <span class="v">$ACCESS_TOKEN</span>"</span> \
+  -H <span class="s">"Content-Type: application/json"</span></div>
+
+    <div class="pro-tip">
+      <div class="pro-tip-label">Token Tip</div>
+      <p>Tokens expire after <strong>3600 seconds (1 hour)</strong>. Your app should track <code>expires_in</code> and request a new token before the old one lapses. Don&rsquo;t request a new token on every API call &mdash; reuse it!</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8: BONUS - REGENERATING SECRETS
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Bonus Chapter</div>
+    <div class="step-heading">
+      <span class="step-number">!</span>
+      Regenerating a Lost Client Secret
+    </div>
+
+    <div class="narration">
+      <p>Lost your Client Secret? It happens to the best of us. Here&rsquo;s how to get a new one:</p>
+    </div>
+
+    <div style="margin: 0.1in 0 0.1in 0.2in;">
+      <p style="font-family: var(--font-narration); font-size: 12pt; margin-bottom: 0.08in;">
+        <strong>1.</strong> Navigate to <span class="nav-path" style="display: inline;">Admin Console &rarr; Users</span>
+      </p>
+      <p style="font-family: var(--font-narration); font-size: 12pt; margin-bottom: 0.08in;">
+        <strong>2.</strong> Find your Integration User in the list
+      </p>
+      <p style="font-family: var(--font-narration); font-size: 12pt; margin-bottom: 0.08in;">
+        <strong>3.</strong> Click the <strong>External Identifier</strong> hyperlink for that user
+      </p>
+      <p style="font-family: var(--font-narration); font-size: 12pt; margin-bottom: 0.08in;">
+        <strong>4.</strong> Click <strong>Save &amp; Regenerate Client Secret</strong>
+      </p>
+      <p style="font-family: var(--font-narration); font-size: 12pt; margin-bottom: 0.08in;">
+        <strong>5.</strong> Copy the new Client ID and Client Secret from the popup
+      </p>
+    </div>
+
+    <div class="warning-box">
+      <p class="warning-label">Important!</p>
+      <p class="body">Regenerating a secret <strong>invalidates the old one immediately</strong>. Update the new secret in <em>all</em> connected applications, or they will lose API access.</p>
+    </div>
+
+    <hr class="gold-rule" style="margin: 0.2in 0;">
+
+    <div class="step-heading" style="margin-top: 0.1in;">
+      <span class="step-number" style="background: var(--color-forest);">+</span>
+      Alternative: Conga API Connections
+    </div>
+
+    <div class="narration">
+      <p>There&rsquo;s a second way to obtain API credentials, via the <strong>API Connections</strong> tab:</p>
+    </div>
+
+    <div class="nav-path">Admin Console &rarr; Organization &rarr; Conga API Connections tab</div>
+
+    <div class="narration" style="margin-top: 0.08in;">
+      <p>Here you can create two types of connections:</p>
+    </div>
+
+    <table class="field-table" style="font-size: 10.5pt;">
+      <thead><tr><th>Type</th><th>Use Case</th><th>Button</th></tr></thead>
+      <tbody>
+        <tr><td><strong>API-to-API</strong></td><td>Server-to-server, no user interaction</td><td>Add API-to-API Connection</td></tr>
+        <tr><td><strong>UI-to-API</strong></td><td>Browser-based apps with user consent</td><td>Add UI-to-API Connection</td></tr>
+      </tbody>
+    </table>
+
+    <div class="narration" style="margin-top: 0.08in;">
+      <p>After filling in the form, click <strong>Save &amp; Generate Client Secret</strong>. The same one-time credentials popup appears. Conga recommends the Integration User method (Chapter 3) for most scenarios.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9: QUEST COMPLETE
+     ============================================================ -->
+<div class="page" style="page: ending;">
+  <div class="page-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+
+    <div class="section-heading" style="font-size: 34pt;">Quest Complete!</div>
+
+    <div style="width: 2in; height: 2px; background: linear-gradient(to right, transparent, var(--color-gold), transparent); margin: 0.15in 0 0.2in;"></div>
+
+    <div class="narration" style="text-align: center; max-width: 5.5in;">
+      <p>You have successfully:</p>
+    </div>
+
+    <ul class="checklist" style="margin: 0.12in 0.5in;">
+      <li class="done">Opened the App Launcher and entered the Admin Console</li>
+      <li class="done">Navigated to the Users page</li>
+      <li class="done">Created an Integration User (User Type: Integration)</li>
+      <li class="done">Captured your Client ID &amp; Client Secret from the popup</li>
+      <li class="done">Obtained a Bearer token via OAuth 2.0 Client Credentials</li>
+      <li class="done">Made your first authenticated API call</li>
+    </ul>
+
+    <div style="width: 2in; height: 2px; background: linear-gradient(to right, transparent, var(--color-gold), transparent); margin: 0.2in 0;"></div>
+
+    <div class="narration" style="text-align: center; max-width: 5in; font-style: italic; color: var(--color-text-light);">
+      <p>May your tokens never expire unexpectedly, may your secrets remain secret, and may your API calls always return <code>200 OK</code>.</p>
+    </div>
+
+    <div class="ornament-divider" style="margin-top: 0.25in;">&#10043;&ensp;&#10043;&ensp;&#10043;</div>
+
+    <p style="font-family: var(--font-whimsy); font-size: 10pt; color: var(--color-text-light); margin-top: 0.25in; text-align: center;">
+      Full documentation at documentation.conga.com<br>
+      Token endpoint: login-rls.congacloud.com/api/v1/auth/connect/token
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 # ============================================================
-# Goldilocks and the Three Bears - PDF Build Script
+# AI Storybook Studio - PDF Build Script
 # ============================================================
 # Usage:
-#   ./build.sh              # Generate images + build PDF
-#   ./build.sh --pdf-only   # Skip image generation, just build PDF
-#   ./build.sh --images-only # Only generate images
+#   ./build.sh <book-name>                # Generate images + build PDF
+#   ./build.sh <book-name> --pdf-only     # Skip image generation, just build PDF
+#   ./build.sh <book-name> --images-only  # Only generate images
+#   ./build.sh --list                     # List available books
+#
+# Examples:
+#   ./build.sh goldilocks
+#   ./build.sh goldilocks --pdf-only
 #
 # Prerequisites:
-#   - Python 3.8+ with: pip install google-genai Pillow
+#   - Python 3.8+ with: pip install google-genai Pillow pymupdf
 #   - PrinceXML: https://www.princexml.com/download/
 #   - Environment variable: GEMINI_IMAGE_API_KEY
 # ============================================================
@@ -16,7 +21,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+BOOKS_DIR="$SCRIPT_DIR/books"
 
 # Colors for output
 RED='\033[0;31m'
@@ -38,63 +43,85 @@ print_warning() { echo -e "  ${YELLOW}!${NC} $1"; }
 print_error()   { echo -e "  ${RED}✗${NC} $1"; }
 print_info()    { echo -e "  ${BLUE}→${NC} $1"; }
 
+# ─────────────────────────────────────────────────────
+# List books
+# ─────────────────────────────────────────────────────
+if [[ "${1:-}" == "--list" ]]; then
+    print_header "Available Books"
+    for dir in "$BOOKS_DIR"/*/; do
+        name=$(basename "$dir")
+        has_html=$([[ -f "$dir/book.html" ]] && echo "✓" || echo "✗")
+        has_images=$(find "$dir/images" -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
+        echo -e "  ${GREEN}${name}${NC}  (html: ${has_html}, images: ${has_images})"
+    done
+    echo ""
+    exit 0
+fi
+
+# ─────────────────────────────────────────────────────
 # Parse arguments
+# ─────────────────────────────────────────────────────
+if [[ -z "${1:-}" ]]; then
+    print_error "Usage: ./build.sh <book-name> [--pdf-only|--images-only]"
+    print_info "Run ./build.sh --list to see available books"
+    exit 1
+fi
+
+BOOK_NAME="$1"
+BOOK_DIR="$BOOKS_DIR/$BOOK_NAME"
+
+if [[ ! -d "$BOOK_DIR" ]]; then
+    print_error "Book not found: $BOOK_NAME"
+    print_info "Available books:"
+    for dir in "$BOOKS_DIR"/*/; do
+        echo "    $(basename "$dir")"
+    done
+    exit 1
+fi
+
 MODE="all"
-if [[ "${1:-}" == "--pdf-only" ]]; then
+if [[ "${2:-}" == "--pdf-only" ]]; then
     MODE="pdf"
-elif [[ "${1:-}" == "--images-only" ]]; then
+elif [[ "${2:-}" == "--images-only" ]]; then
     MODE="images"
 fi
+
+print_header "Building: $BOOK_NAME"
 
 # ─────────────────────────────────────────────────────
 # Step 1: Check prerequisites
 # ─────────────────────────────────────────────────────
 print_header "Checking Prerequisites"
 
-# Check Python
 if command -v python3 &>/dev/null; then
-    PYTHON_VERSION=$(python3 --version 2>&1)
-    print_success "Python: $PYTHON_VERSION"
+    print_success "Python: $(python3 --version 2>&1)"
 else
-    print_error "Python 3 not found. Install from https://python.org"
+    print_error "Python 3 not found."
     exit 1
 fi
 
-# Check PrinceXML
 if [[ "$MODE" != "images" ]]; then
     if command -v prince &>/dev/null; then
-        PRINCE_VERSION=$(prince --version 2>&1 | head -1)
-        print_success "PrinceXML: $PRINCE_VERSION"
+        print_success "PrinceXML: $(prince --version 2>&1 | head -1)"
     else
-        print_warning "PrinceXML not found."
-        print_info "Install from: https://www.princexml.com/download/"
-        print_info "On macOS: brew install prince"
-        if [[ "$MODE" == "pdf" ]]; then
-            exit 1
-        fi
+        print_warning "PrinceXML not found. Install: brew install prince"
+        [[ "$MODE" == "pdf" ]] && exit 1
     fi
 fi
 
-# Check API key (only needed for image generation)
 if [[ "$MODE" != "pdf" ]]; then
     if [[ -z "${GEMINI_IMAGE_API_KEY:-}" ]]; then
         print_error "GEMINI_IMAGE_API_KEY not set."
-        print_info "Get an API key at: https://aistudio.google.com/apikey"
-        print_info "Then run: export GEMINI_IMAGE_API_KEY=\"your-key-here\""
         exit 1
     else
         print_success "GEMINI_IMAGE_API_KEY is set"
     fi
-fi
 
-# Check Python packages
-if [[ "$MODE" != "pdf" ]]; then
     if python3 -c "from google import genai" 2>/dev/null; then
         print_success "google-genai package installed"
     else
-        print_warning "google-genai not installed. Installing..."
-        pip install google-genai Pillow
-        print_success "Packages installed"
+        print_warning "Installing google-genai..."
+        pip install google-genai Pillow pymupdf
     fi
 fi
 
@@ -103,15 +130,11 @@ fi
 # ─────────────────────────────────────────────────────
 if [[ "$MODE" != "pdf" ]]; then
     print_header "Generating Illustrations"
-
-    # Count existing images
-    EXISTING=$(find images -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
-    print_info "Found $EXISTING existing images in images/"
-
+    cd "$BOOK_DIR"
     python3 generate-images.py
-
     TOTAL=$(find images -name "*.png" 2>/dev/null | wc -l | tr -d ' ')
     print_success "Total images: $TOTAL"
+    cd "$SCRIPT_DIR"
 fi
 
 # ─────────────────────────────────────────────────────
@@ -121,35 +144,38 @@ if [[ "$MODE" != "images" ]]; then
     if command -v prince &>/dev/null; then
         print_header "Building PDF with PrinceXML"
 
-        OUTPUT_FILE="goldilocks-and-the-three-bears.pdf"
+        OUTPUT_FILE="$BOOK_DIR/${BOOK_NAME}.pdf"
 
-        print_info "Input:  book.html"
+        print_info "Input:  $BOOK_DIR/book.html"
         print_info "Output: $OUTPUT_FILE"
         echo ""
 
-        prince book.html \
+        prince "$BOOK_DIR/book.html" \
             --output="$OUTPUT_FILE" \
-            --pdf-profile="PDF/A-3b" \
             --page-size="8.5in 11in" \
             --no-artificial-fonts \
             2>&1 | while IFS= read -r line; do
                 echo "  prince: $line"
             done
 
+        # Strip Prince watermark annotation
         if [[ -f "$OUTPUT_FILE" ]]; then
-            FILE_SIZE=$(ls -lh "$OUTPUT_FILE" | awk '{print $5}')
-            PAGE_COUNT=$(python3 -c "
-try:
-    import subprocess
-    result = subprocess.run(['prince', '--version'], capture_output=True, text=True)
-    print('~14')
-except:
-    print('~14')
-" 2>/dev/null || echo "~14")
-            print_success "PDF generated: $OUTPUT_FILE ($FILE_SIZE)"
-            echo ""
+            python3 -c "
+import fitz, shutil, sys
+pdf_path = sys.argv[1]
+tmp_path = pdf_path + '.tmp'
+doc = fitz.open(pdf_path)
+for page in doc:
+    for annot in list(page.annots() or []):
+        page.delete_annot(annot)
+doc.save(tmp_path, deflate=True, garbage=4)
+doc.close()
+shutil.move(tmp_path, pdf_path)
+" "$OUTPUT_FILE" 2>/dev/null || true
 
-            # Try to open on macOS
+            FILE_SIZE=$(ls -lh "$OUTPUT_FILE" | awk '{print $5}')
+            print_success "PDF generated: $OUTPUT_FILE ($FILE_SIZE)"
+
             if [[ "$(uname)" == "Darwin" ]]; then
                 print_info "Opening PDF..."
                 open "$OUTPUT_FILE" 2>/dev/null || true
@@ -160,20 +186,16 @@ except:
         fi
     else
         print_warning "Skipping PDF generation (PrinceXML not installed)"
-        print_info "To generate the PDF manually:"
-        print_info "  prince book.html -o goldilocks-and-the-three-bears.pdf"
     fi
 fi
 
 # ─────────────────────────────────────────────────────
 # Done
 # ─────────────────────────────────────────────────────
-print_header "Complete!"
-echo -e "  Project files:"
-echo -e "    ${GREEN}book.html${NC}                            - HTML source"
-echo -e "    ${GREEN}images/${NC}                              - Generated illustrations"
-echo -e "    ${GREEN}generate-images.py${NC}                   - Image generation script"
-if [[ -f "goldilocks-and-the-three-bears.pdf" ]]; then
-echo -e "    ${GREEN}goldilocks-and-the-three-bears.pdf${NC}   - Final PDF"
-fi
+print_header "Complete: $BOOK_NAME"
+echo -e "  ${GREEN}$BOOK_DIR/${NC}"
+echo -e "    book.html           - HTML source"
+echo -e "    generate-images.py  - Image generation script"
+echo -e "    images/             - Illustrations"
+[[ -f "$BOOK_DIR/${BOOK_NAME}.pdf" ]] && echo -e "    ${BOOK_NAME}.pdf    - Final PDF"
 echo ""
