@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Goldilocks and the Three Bears</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Patrick+Hand&family=Caveat:wght@400;500;600;700&family=Amatic+SC:wght@400;700&family=Cinzel+Decorative:wght@400;700;900&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ============================================================ */
+:root {
+  /* Color palette */
+  --color-gold:          #D4A03C;
+  --color-gold-light:    #F5E6B8;
+  --color-gold-dark:     #8B6914;
+  --color-forest:        #2D5A27;
+  --color-forest-light:  #4A8C3F;
+  --color-forest-pale:   #E8F0E6;
+  --color-cream:         #FFF8E7;
+  --color-cream-dark:    #F5ECD4;
+  --color-brown:         #6B3A2A;
+  --color-brown-light:   #A0674B;
+  --color-sky:           #7BAFD4;
+  --color-sky-light:     #D4E8F5;
+  --color-rose:          #D4737A;
+  --color-rose-light:    #F5D4D7;
+  --color-text:          #3A2A1A;
+  --color-text-light:    #6B5A4A;
+  --color-white:         #FFFFFF;
+  --color-overlay-light: rgba(255, 248, 231, 0.88);
+  --color-overlay-gold:  rgba(212, 160, 60, 0.12);
+
+  /* Typography */
+  --font-title:     'Cinzel Decorative', 'Playfair Display', serif;
+  --font-heading:   'Playfair Display', Georgia, serif;
+  --font-narration: 'Crimson Text', 'Georgia', serif;
+  --font-dialogue:  'Patrick Hand', 'Comic Sans MS', cursive;
+  --font-whimsy:    'Caveat', cursive;
+  --font-display:   'Amatic SC', cursive;
+
+  /* Spacing */
+  --page-width:  8.5in;
+  --page-height: 11in;
+  --bleed:       0.125in;
+  --margin-outer: 0.75in;
+  --margin-inner: 0.875in;
+  --gutter:       0.25in;
+}
+
+/* ============================================================
+   PAGED MEDIA - PrinceXML
+   ============================================================ */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
+}
+
+@page :left {
+  @bottom-left {
+    content: counter(page);
+    font-family: var(--font-whimsy);
+    font-size: 11pt;
+    color: var(--color-brown-light);
+    margin-left: 0.75in;
+    margin-bottom: 0.4in;
+  }
+}
+
+@page :right {
+  @bottom-right {
+    content: counter(page);
+    font-family: var(--font-whimsy);
+    font-size: 11pt;
+    color: var(--color-brown-light);
+    margin-right: 0.75in;
+    margin-bottom: 0.4in;
+  }
+}
+
+/* Named pages with no page numbers */
+@page cover   { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page title   { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page ending  { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+/* ============================================================
+   BASE RESET & TYPOGRAPHY
+   ============================================================ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 12pt;
+}
+
+body {
+  font-family: var(--font-narration);
+  color: var(--color-text);
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ============================================================
+   PAGE STRUCTURE
+   ============================================================ */
+.page {
+  width: var(--page-width);
+  height: var(--page-height);
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  page-break-inside: avoid;
+}
+
+.page:last-child {
+  page-break-after: auto;
+}
+
+.page-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: var(--margin-outer);
+}
+
+/* ============================================================
+   SVG DEFINITIONS (masks, clip paths, shapes)
+   ============================================================ */
+
+/* ============================================================
+   COVER PAGE
+   ============================================================ */
+.page--cover {
+  page: cover;
+  background: var(--color-brown);
+}
+
+.cover-image {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cover-overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.05) 0%,
+    rgba(0,0,0,0) 30%,
+    rgba(0,0,0,0) 50%,
+    rgba(0,0,0,0.35) 80%,
+    rgba(0,0,0,0.65) 100%
+  );
+  z-index: 1;
+}
+
+.cover-title-block {
+  position: absolute;
+  bottom: 1.2in;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 2;
+  padding: 0 0.6in;
+}
+
+.cover-title {
+  font-family: var(--font-title);
+  font-size: 36pt;
+  font-weight: 900;
+  color: var(--color-gold-light);
+  text-shadow: 0 2px 8px rgba(0,0,0,0.6), 0 0 30px rgba(212,160,60,0.3);
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.15in;
+}
+
+.cover-subtitle {
+  font-family: var(--font-whimsy);
+  font-size: 16pt;
+  color: var(--color-cream);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  letter-spacing: 0.08em;
+}
+
+/* ============================================================
+   TITLE PAGE
+   ============================================================ */
+.page--title {
+  page: title;
+  background: var(--color-cream);
+}
+
+.title-page-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding: 1in;
+}
+
+.title-ornament-top {
+  width: 2in;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin-bottom: 0.4in;
+}
+
+.title-main {
+  font-family: var(--font-title);
+  font-size: 30pt;
+  font-weight: 700;
+  color: var(--color-brown);
+  line-height: 1.2;
+  margin-bottom: 0.15in;
+}
+
+.title-ampersand {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 20pt;
+  color: var(--color-gold);
+  display: block;
+  margin: 0.05in 0;
+}
+
+.title-sub {
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 13pt;
+  color: var(--color-text-light);
+  margin-bottom: 0.5in;
+}
+
+.title-vignette-wrapper {
+  position: relative;
+  width: 5in;
+  height: 5in;
+  margin: 0 auto 0.4in;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 4px 24px rgba(139,105,20,0.12);
+}
+
+.title-vignette {
+  width: 130%;
+  height: 130%;
+  margin: -15%;
+  object-fit: cover;
+  object-position: center 45%;
+}
+
+.title-ornament-bottom {
+  width: 2in;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin-top: 0.3in;
+}
+
+.title-retold {
+  font-family: var(--font-whimsy);
+  font-size: 11pt;
+  color: var(--color-text-light);
+  margin-top: 0.25in;
+}
+
+/* ============================================================
+   STORY PAGES - GENERAL
+   ============================================================ */
+.page--story {
+  background: var(--color-cream);
+  position: relative;
+}
+
+/* Subtle background texture overlay */
+.page-bg-texture {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: url('images/forest_bg_texture.png');
+  background-size: cover;
+  background-position: center;
+  opacity: 0.06;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.page--story .page-content {
+  position: relative;
+  z-index: 1;
+}
+
+/* Page border overlay */
+.page-border-overlay {
+  position: absolute;
+  top: 0.15in; left: 0.15in; right: 0.15in; bottom: 0.15in;
+  background-image: url('images/decorative_border.png');
+  background-size: 100% 100%;
+  opacity: 0.12;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Chapter/section numbers */
+.chapter-marker {
+  font-family: var(--font-display);
+  font-size: 42pt;
+  font-weight: 700;
+  color: var(--color-gold);
+  opacity: 0.18;
+  position: absolute;
+  top: 0.3in;
+  right: 0.5in;
+  z-index: 0;
+}
+
+/* ============================================================
+   TYPOGRAPHY STYLES
+   ============================================================ */
+.narration {
+  font-family: var(--font-narration);
+  font-size: 13pt;
+  line-height: 1.7;
+  color: var(--color-text);
+  text-align: justify;
+  hyphens: auto;
+  -webkit-hyphens: auto;
+}
+
+.narration p {
+  margin-bottom: 0.15in;
+  text-indent: 0.3in;
+}
+
+.narration p:first-child {
+  text-indent: 0;
+}
+
+/* Drop cap for opening paragraphs */
+.drop-cap::first-letter {
+  font-family: var(--font-title);
+  font-size: 52pt;
+  float: left;
+  line-height: 0.8;
+  padding-right: 0.08in;
+  padding-top: 0.06in;
+  color: var(--color-gold-dark);
+}
+
+/* Dialogue styling */
+.dialogue {
+  font-family: var(--font-dialogue);
+  font-size: 14.5pt;
+  line-height: 1.5;
+  color: var(--color-brown);
+  margin: 0.12in 0;
+  padding-left: 0.2in;
+  text-indent: 0 !important;
+}
+
+.dialogue--papa {
+  font-size: 17pt;
+  color: var(--color-brown);
+}
+
+.dialogue--mama {
+  font-size: 14.5pt;
+  color: var(--color-rose);
+}
+
+.dialogue--baby {
+  font-size: 13pt;
+  color: var(--color-forest-light);
+}
+
+.dialogue-speaker {
+  font-family: var(--font-whimsy);
+  font-size: 10pt;
+  color: var(--color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  display: block;
+  margin-bottom: 0.02in;
+}
+
+/* Section headings on story pages */
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 28pt;
+  font-weight: 700;
+  color: var(--color-gold-dark);
+  text-align: center;
+  margin-bottom: 0.25in;
+  letter-spacing: 0.04em;
+}
+
+.section-heading-ornament {
+  display: block;
+  text-align: center;
+  margin-bottom: 0.2in;
+}
+
+.section-heading-ornament svg {
+  width: 1.5in;
+  height: 0.15in;
+}
+
+/* ============================================================
+   IMAGE TREATMENT CLASSES
+   ============================================================ */
+
+/* Full bleed image */
+.img-full-bleed {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Large centered image with soft shadow */
+.img-hero {
+  display: block;
+  max-width: 100%;
+  margin: 0.2in auto;
+  border-radius: 0.1in;
+  box-shadow: 0 4px 16px rgba(59,42,26,0.15);
+}
+
+/* Float image left with text wrap */
+.img-float-left {
+  float: left;
+  width: 3.2in;
+  margin: 0 0.25in 0.15in 0;
+  border-radius: 0.08in;
+  shape-outside: inset(0 round 0.08in);
+}
+
+/* Float image right with text wrap */
+.img-float-right {
+  float: right;
+  width: 3.2in;
+  margin: 0 0 0.15in 0.25in;
+  border-radius: 0.08in;
+  shape-outside: inset(0 round 0.08in);
+}
+
+/* Circular masked image */
+.img-circle {
+  border-radius: 50%;
+  shape-outside: circle(50%);
+}
+
+/* Cloud/blob shaped mask using SVG */
+.img-blob-mask {
+  clip-path: url(#blob-clip);
+  shape-outside: url(#blob-clip);
+}
+
+/* Soft vignette border */
+.img-vignette {
+  mask-image: radial-gradient(ellipse 90% 90% at center, black 60%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 90% 90% at center, black 60%, transparent 100%);
+}
+
+/* Panoramic wide image */
+.img-panoramic {
+  width: 100%;
+  height: 3.5in;
+  object-fit: cover;
+  border-radius: 0.06in;
+  margin: 0.2in 0;
+}
+
+/* Image with organic blob shape */
+.img-organic {
+  clip-path: polygon(
+    5% 0%, 95% 2%, 100% 8%, 98% 92%,
+    95% 100%, 5% 98%, 0% 92%, 2% 8%
+  );
+}
+
+/* ============================================================
+   DECORATIVE ELEMENTS
+   ============================================================ */
+
+/* Ornamental divider */
+.ornament-divider {
+  text-align: center;
+  margin: 0.25in 0;
+  color: var(--color-gold);
+  font-size: 14pt;
+  letter-spacing: 0.3em;
+}
+
+/* Gold rule */
+.gold-rule {
+  border: none;
+  height: 1.5px;
+  background: linear-gradient(to right, transparent, var(--color-gold), transparent);
+  margin: 0.2in 0;
+}
+
+/* Pull quote / highlight box */
+.pull-quote {
+  background: var(--color-overlay-gold);
+  border-left: 3px solid var(--color-gold);
+  padding: 0.15in 0.25in;
+  margin: 0.2in 0;
+  border-radius: 0 0.06in 0.06in 0;
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 14pt;
+  color: var(--color-brown);
+  line-height: 1.5;
+}
+
+/* Text overlay box (for text over images) */
+.text-overlay-box {
+  background: var(--color-overlay-light);
+  backdrop-filter: blur(4px);
+  border-radius: 0.12in;
+  padding: 0.3in;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+}
+
+/* Two-column layout */
+.two-columns {
+  column-count: 2;
+  column-gap: 0.35in;
+  column-rule: 1px solid var(--color-gold-light);
+}
+
+/* ============================================================
+   SPECIFIC PAGE LAYOUTS
+   ============================================================ */
+
+/* Page 3-4: Introduction with large image */
+.layout-intro {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3in;
+  height: 100%;
+  align-items: center;
+}
+
+.layout-intro .text-block {
+  padding-right: 0.15in;
+}
+
+.layout-intro .image-block {
+  position: relative;
+}
+
+.layout-intro .image-block img {
+  width: 100%;
+  border-radius: 0.15in;
+  box-shadow: 0 6px 24px rgba(59,42,26,0.18);
+}
+
+/* Image with overlaid text panel */
+.layout-image-with-overlay {
+  position: relative;
+  height: 100%;
+}
+
+.layout-image-with-overlay img {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 0;
+}
+
+.layout-image-with-overlay .text-panel {
+  position: absolute;
+  bottom: 0.6in;
+  left: 0.6in;
+  right: 0.6in;
+  background: var(--color-overlay-light);
+  border-radius: 0.15in;
+  padding: 0.35in;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+/* Ending page */
+.page--ending {
+  page: ending;
+  background: var(--color-cream);
+}
+
+.ending-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.the-end {
+  font-family: var(--font-title);
+  font-size: 36pt;
+  color: var(--color-gold-dark);
+  margin-bottom: 0.3in;
+}
+
+/* ============================================================
+   SVG DECORATIVE SHAPES (inline)
+   ============================================================ */
+.svg-cloud-mask {
+  position: absolute;
+  width: 0;
+  height: 0;
+}
+
+/* Wavy top border for image sections */
+.wavy-top {
+  position: relative;
+}
+.wavy-top::before {
+  content: '';
+  position: absolute;
+  top: -0.3in;
+  left: 0;
+  right: 0;
+  height: 0.4in;
+  background: var(--color-cream);
+  clip-path: polygon(
+    0% 100%, 2% 80%, 5% 65%, 8% 55%, 12% 50%,
+    16% 48%, 20% 50%, 25% 58%, 30% 55%, 35% 48%,
+    40% 45%, 45% 48%, 50% 55%, 55% 52%, 60% 45%,
+    65% 42%, 70% 45%, 75% 55%, 80% 50%, 85% 45%,
+    90% 50%, 95% 60%, 98% 75%, 100% 100%
+  );
+  z-index: 2;
+}
+
+/* Star decoration */
+.deco-star {
+  display: inline-block;
+  color: var(--color-gold);
+  font-size: 8pt;
+  margin: 0 0.05in;
+  vertical-align: middle;
+}
+
+/* ============================================================
+   RESPONSIVE IMAGE POSITIONS PER PAGE
+   ============================================================ */
+
+/* Page with image bleeding from right edge */
+.img-bleed-right {
+  position: absolute;
+  top: 0.5in;
+  right: 0;
+  width: 55%;
+  height: calc(100% - 1in);
+  object-fit: cover;
+  mask-image: linear-gradient(to left, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to left, black 70%, transparent 100%);
+}
+
+/* Page with image bleeding from top */
+.img-bleed-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 55%;
+  object-fit: cover;
+  mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 65%, transparent 100%);
+}
+
+/* Small accent image tucked in corner */
+.img-corner-accent {
+  position: absolute;
+  bottom: 0.4in;
+  right: 0.4in;
+  width: 2in;
+  height: 2in;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid var(--color-gold-light);
+  box-shadow: 0 3px 12px rgba(0,0,0,0.1);
+}
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PAGE 1: COVER
+     ============================================================ -->
+<div class="page page--cover">
+  <!-- SVG DEFINITIONS (inside cover to avoid blank page in PrinceXML) -->
+  <svg style="position:absolute;width:0;height:0;overflow:hidden;" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <clipPath id="blob-clip" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0.02 C0.7,0.02 0.88,0.08 0.95,0.22 C1.02,0.38 0.98,0.58 0.95,0.72 C0.9,0.88 0.75,0.98 0.5,0.98 C0.25,0.98 0.1,0.88 0.05,0.72 C0.02,0.58 -0.02,0.38 0.05,0.22 C0.12,0.08 0.3,0.02 0.5,0.02Z"/>
+      </clipPath>
+      <clipPath id="cloud-clip" clipPathUnits="objectBoundingBox">
+        <path d="M0.15,0.7 C0.05,0.7 0,0.6 0.05,0.5 C0.02,0.4 0.1,0.3 0.2,0.3 C0.2,0.15 0.35,0.05 0.5,0.1 C0.6,0.02 0.8,0.05 0.85,0.2 C0.95,0.2 1,0.35 0.95,0.45 C1,0.55 0.98,0.7 0.85,0.7Z"/>
+      </clipPath>
+      <clipPath id="leaf-clip" clipPathUnits="objectBoundingBox">
+        <path d="M0.5,0 C0.75,0.15 1,0.4 0.95,0.65 C0.9,0.85 0.7,1 0.5,1 C0.3,1 0.1,0.85 0.05,0.65 C0,0.4 0.25,0.15 0.5,0Z"/>
+      </clipPath>
+      <symbol id="ornament-swirl" viewBox="0 0 200 20">
+        <path d="M0,10 Q25,0 50,10 Q75,20 100,10 Q125,0 150,10 Q175,20 200,10"
+              fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+        <circle cx="100" cy="10" r="3" fill="currentColor" opacity="0.4"/>
+        <circle cx="0" cy="10" r="2" fill="currentColor" opacity="0.3"/>
+        <circle cx="200" cy="10" r="2" fill="currentColor" opacity="0.3"/>
+      </symbol>
+    </defs>
+  </svg>
+  <img class="cover-image" src="images/cover.png" alt="Goldilocks and the Three Bears cover illustration">
+  <div class="cover-overlay"></div>
+  <div class="cover-title-block">
+    <h1 class="cover-title">Goldilocks<br>&amp; the<br>Three Bears</h1>
+    <p class="cover-subtitle">A Classic Fairy Tale</p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 2: TITLE PAGE
+     ============================================================ -->
+<div class="page page--title">
+  <div class="title-page-inner">
+    <div class="title-ornament-top"></div>
+
+    <h2 class="title-main">
+      Goldilocks
+      <span class="title-ampersand">&amp; the</span>
+      Three Bears
+    </h2>
+
+    <p class="title-sub">A Timeless Tale Retold</p>
+
+    <div style="text-align: center; margin: 0 auto 0.4in;">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 600" width="5.5in" height="5.5in">
+        <defs>
+          <radialGradient id="title-fg" cx="300" cy="300" r="240" gradientUnits="userSpaceOnUse">
+            <stop offset="0.50" stop-color="white"/>
+            <stop offset="0.72" stop-color="white" stop-opacity="0.65"/>
+            <stop offset="0.88" stop-color="white" stop-opacity="0.15"/>
+            <stop offset="1.0" stop-color="white" stop-opacity="0"/>
+          </radialGradient>
+          <mask id="title-feather" maskUnits="userSpaceOnUse" x="0" y="0" width="600" height="600">
+            <circle cx="300" cy="300" r="240" fill="url(#title-fg)"/>
+          </mask>
+        </defs>
+        <image href="images/title_vignette.png" x="0" y="0" width="600" height="600"
+               preserveAspectRatio="xMidYMid slice" mask="url(#title-feather)"/>
+      </svg>
+    </div>
+
+    <div class="title-ornament-bottom"></div>
+
+    <p class="title-retold">
+      Illustrated with the magic of imagination
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3: ONCE UPON A TIME - THE THREE BEARS
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <div class="page-border-overlay"></div>
+  <span class="chapter-marker">1</span>
+
+  <div class="page-content">
+    <div class="section-heading">Once Upon a Time</div>
+    <div class="section-heading-ornament">
+      <svg viewBox="0 0 200 20" style="width:1.5in; height:0.15in; color: var(--color-gold);">
+        <use href="#ornament-swirl"/>
+      </svg>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.3in; align-items: start;">
+      <div class="narration">
+        <p class="drop-cap">Once upon a time, in a cozy little cottage tucked deep within an enchanted forest, there lived three bears. There was great big <strong>Papa Bear</strong>, whose voice rumbled like gentle thunder. There was middle-sized <strong>Mama Bear</strong>, whose voice was warm as honey. And there was wee little <strong>Baby Bear</strong>, whose voice was as small and sweet as a tinkling bell.</p>
+
+        <p>They were the happiest family in all the woodland, and every creature in the forest &mdash; from the tiniest field mouse to the wisest old owl &mdash; loved them dearly.</p>
+
+        <p>Their cottage had round windows that glowed like lanterns at dusk, a garden bursting with sunflowers, and a chimney that always trailed the most delicious smells into the treetops above.</p>
+      </div>
+
+      <div style="position: relative;">
+        <img src="images/bear_family.png" alt="The three bears: Papa, Mama, and Baby Bear"
+             style="width: 100%; border-radius: 0.15in; box-shadow: 0 6px 24px rgba(59,42,26,0.18);">
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4: THE COTTAGE & MORNING PORRIDGE
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <span class="chapter-marker">2</span>
+
+  <div class="page-content">
+    <img src="images/cottage_interior.png" alt="The bears' cozy kitchen"
+         class="img-panoramic img-organic"
+         style="margin-top: 0; margin-bottom: 0.25in;">
+
+    <div class="narration two-columns">
+      <p>One bright and golden morning, Mama Bear stirred a big pot of creamy porridge over the crackling fire. The kitchen filled with the sweet smell of oats and honey, swirling through the cottage like a warm hug.</p>
+
+      <p>She ladled the porridge into three bowls &mdash; a <em>great big bowl</em> for Papa Bear, a <em>middle-sized bowl</em> for herself, and a <em>wee little bowl</em> for Baby Bear &mdash; and set them on their old wooden table.</p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;This porridge is far too hot to eat!&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--mama">
+        <span class="dialogue-speaker">Mama Bear</span>
+        &ldquo;Let us take a walk in the forest while it cools.&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--baby">
+        <span class="dialogue-speaker">Baby Bear</span>
+        &ldquo;Oh yes! Perhaps we&rsquo;ll see the rabbits!&rdquo;
+      </p>
+
+      <p>And so the three bears set off along the winding forest path, leaving their front door unlocked &mdash; for in those days, no one in the forest ever locked their doors.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5: BEARS WALK / GOLDILOCKS APPEARS
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <img src="images/bears_walking.png" alt="Bears walking through the forest"
+         class="img-hero"
+         style="width: 100%; height: 3.2in; object-fit: cover; border-radius: 0.12in; margin-bottom: 0.25in;">
+
+    <hr class="gold-rule">
+
+    <div class="narration" style="margin-top: 0.2in;">
+      <p>The bears ambled happily along the mossy path. Papa Bear pointed out interesting mushrooms. Mama Bear gathered wildflowers for the kitchen table. Baby Bear chased butterflies and splashed in every puddle he could find.</p>
+
+      <p>But while the three bears were away, someone else was wandering through the very same forest&hellip;</p>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 3in 1fr; gap: 0.2in; margin-top: 0.2in; align-items: center;">
+      <div>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 520" width="3in" height="3.9in">
+          <defs>
+            <mask id="feather-oval" maskContentUnits="objectBoundingBox">
+              <radialGradient id="feather-grad" cx="0.5" cy="0.5" rx="0.5" ry="0.5">
+                <stop offset="0.55" stop-color="white"/>
+                <stop offset="0.78" stop-color="white" stop-opacity="0.8"/>
+                <stop offset="0.90" stop-color="white" stop-opacity="0.3"/>
+                <stop offset="1.0" stop-color="white" stop-opacity="0"/>
+              </radialGradient>
+              <ellipse cx="0.5" cy="0.5" rx="0.46" ry="0.48" fill="url(#feather-grad)"/>
+            </mask>
+          </defs>
+          <image href="images/goldilocks_forest.png" x="0" y="0" width="400" height="520"
+                 preserveAspectRatio="xMidYMid slice" mask="url(#feather-oval)"/>
+        </svg>
+      </div>
+      <div class="narration">
+        <p>A little girl named <strong>Goldilocks</strong> came skipping through the trees. She had the most magnificent golden curls that bounced and shimmered in the dappled sunlight, and eyes as bright and curious as a magpie&rsquo;s.</p>
+
+        <p>When she spotted the bears&rsquo; cottage, with its round windows and curling chimney smoke, she stopped and stared.</p>
+
+        <p class="dialogue" style="font-size: 15pt; color: var(--color-gold-dark);">
+          &ldquo;What a perfectly lovely little house!&rdquo;
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6: GOLDILOCKS ENTERS - THE PORRIDGE
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <div class="page-border-overlay"></div>
+  <span class="chapter-marker">3</span>
+
+  <div class="page-content">
+    <div class="section-heading">The Three Porridges</div>
+    <div class="section-heading-ornament">
+      <svg viewBox="0 0 200 20" style="width:1.5in; height:0.15in; color: var(--color-gold);">
+        <use href="#ornament-swirl"/>
+      </svg>
+    </div>
+
+    <div class="narration">
+      <p>Goldilocks knocked on the door. When no one answered, she pushed it open and stepped inside. The kitchen smelled absolutely <em>heavenly</em>.</p>
+
+      <p>On the table sat three bowls of porridge, and Goldilocks &mdash; who had not eaten breakfast &mdash; felt her tummy rumble.</p>
+    </div>
+
+    <img src="images/tasting_porridge.png" alt="Goldilocks tasting the porridge"
+         class="img-float-right img-vignette"
+         style="width: 3.5in; margin-top: 0.1in;">
+
+    <div class="narration">
+      <p>She picked up the big spoon from Papa Bear&rsquo;s great big bowl and took a taste.</p>
+
+      <p class="dialogue dialogue--papa" style="color: var(--color-rose);">
+        &ldquo;Ouch! This porridge is TOO HOT!&rdquo;
+      </p>
+
+      <p>She tried Mama Bear&rsquo;s middle-sized bowl.</p>
+
+      <p class="dialogue dialogue--mama" style="color: var(--color-sky);">
+        &ldquo;Brrr! This porridge is TOO COLD!&rdquo;
+      </p>
+
+      <p>Then she tried Baby Bear&rsquo;s wee little bowl.</p>
+
+      <p class="dialogue" style="font-size: 16pt; color: var(--color-gold-dark);">
+        &ldquo;Mmmm! This porridge is JUST RIGHT!&rdquo;
+      </p>
+
+      <p>And she ate it all up, every last drop, until the little blue bowl was completely empty. She even licked the spoon.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: THE THREE CHAIRS
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <span class="chapter-marker">4</span>
+
+  <div class="page-content">
+    <div class="section-heading">The Three Chairs</div>
+    <div class="section-heading-ornament">
+      <svg viewBox="0 0 200 20" style="width:1.5in; height:0.15in; color: var(--color-gold);">
+        <use href="#ornament-swirl"/>
+      </svg>
+    </div>
+
+    <div class="narration">
+      <p>With a full tummy and tired legs, Goldilocks wandered into the sitting room, where she found three chairs.</p>
+
+      <p>She climbed up into Papa Bear&rsquo;s great big chair.</p>
+
+      <p class="dialogue" style="color: var(--color-brown);">
+        &ldquo;This chair is TOO HARD!&rdquo;
+      </p>
+
+      <p>She wriggled into Mama Bear&rsquo;s middle-sized chair.</p>
+
+      <p class="dialogue" style="color: var(--color-rose);">
+        &ldquo;This chair is TOO SOFT!&rdquo;
+      </p>
+
+      <p>Then she sat in Baby Bear&rsquo;s wee little chair.</p>
+
+      <p class="dialogue" style="font-size: 16pt; color: var(--color-gold-dark);">
+        &ldquo;This chair is JUST RIGHT!&rdquo;
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 0.1in 0;">
+      <img src="images/broken_chair.png" alt="Goldilocks breaks Baby Bear's chair"
+           style="width: 3.4in; clip-path: url(#blob-clip); box-shadow: 0 4px 16px rgba(59,42,26,0.12);">
+    </div>
+
+    <div class="narration" style="text-align: center;">
+      <p style="text-indent: 0;">But Goldilocks was a little too heavy for the wee little chair, and with a <strong>CRACK</strong> and a <strong>SNAP</strong>&thinsp;&mdash;&thinsp;it broke into pieces!</p>
+
+      <p style="text-indent: 0; font-family: var(--font-whimsy); font-size: 11pt; color: var(--color-text-light);">
+        <em>Down tumbled Goldilocks, right onto the rug.</em>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8: THE THREE BEDS
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <div class="page-border-overlay"></div>
+  <span class="chapter-marker">5</span>
+
+  <div class="page-content" style="padding: 0;">
+    <!-- Full page image with text overlay -->
+    <div class="layout-image-with-overlay">
+      <img src="images/sleeping_goldilocks.png" alt="Goldilocks sleeping in Baby Bear's bed">
+
+      <div class="text-panel" style="bottom: 0.5in; left: 0.5in; right: 0.5in;">
+        <div class="section-heading" style="margin-bottom: 0.15in; font-size: 24pt;">The Three Beds</div>
+
+        <div class="narration" style="font-size: 12pt;">
+          <p style="text-indent: 0;">Feeling quite sleepy now, Goldilocks climbed the creaky stairs and found a bedroom with three beds.</p>
+
+          <p>She lay upon Papa Bear&rsquo;s great big bed. <span class="dialogue" style="display: inline; margin: 0; padding: 0;">&ldquo;Too hard!&rdquo;</span> She tried Mama Bear&rsquo;s middle-sized bed. <span class="dialogue" style="display: inline; margin: 0; padding: 0;">&ldquo;Too soft!&rdquo;</span></p>
+
+          <p>Then she curled up in Baby Bear&rsquo;s wee little bed&hellip;</p>
+
+          <p class="dialogue" style="font-size: 16pt; text-align: center; color: var(--color-gold-dark);">
+            &ldquo;This bed is JUST RIGHT.&rdquo;
+          </p>
+
+          <p style="text-align: center; font-family: var(--font-whimsy); color: var(--color-text-light); font-size: 11pt;">
+            And in no time at all, she was fast asleep.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9: THE BEARS RETURN
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <span class="chapter-marker">6</span>
+
+  <div class="page-content">
+    <div class="section-heading">The Bears Come Home</div>
+    <div class="section-heading-ornament">
+      <svg viewBox="0 0 200 20" style="width:1.5in; height:0.15in; color: var(--color-gold);">
+        <use href="#ornament-swirl"/>
+      </svg>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 3in; gap: 0.3in; align-items: start;">
+      <div class="narration">
+        <p class="drop-cap">Before long, the three bears returned from their walk, feeling hungry and ready for their porridge.</p>
+
+        <p>Papa Bear looked at his great big bowl and growled in his great big voice:</p>
+
+        <p class="dialogue dialogue--papa">
+          <span class="dialogue-speaker">Papa Bear</span>
+          &ldquo;SOMEBODY HAS BEEN EATING MY PORRIDGE!&rdquo;
+        </p>
+
+        <p>Mama Bear looked at her middle-sized bowl and said in her middle-sized voice:</p>
+
+        <p class="dialogue dialogue--mama">
+          <span class="dialogue-speaker">Mama Bear</span>
+          &ldquo;Somebody has been eating my porridge!&rdquo;
+        </p>
+
+        <p>Baby Bear looked at his wee little bowl and cried in his wee little voice:</p>
+
+        <p class="dialogue dialogue--baby">
+          <span class="dialogue-speaker">Baby Bear</span>
+          &ldquo;Somebody has been eating my porridge &mdash; and they&rsquo;ve eaten it ALL UP!&rdquo;
+        </p>
+      </div>
+
+      <div>
+        <img src="images/bears_return.png" alt="Bears discover their porridge has been disturbed"
+             style="width: 100%; border-radius: 0.12in;
+                    box-shadow: 0 4px 16px rgba(59,42,26,0.15);
+                    clip-path: url(#leaf-clip);">
+      </div>
+    </div>
+
+    <hr class="gold-rule" style="margin-top: 0.25in;">
+
+    <div class="narration" style="margin-top: 0.15in;">
+      <p>The bears looked at each other with wide, worried eyes. Then they noticed the chairs&hellip;</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 10: DISCOVERY - CHAIRS & UPSTAIRS
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content">
+    <div style="text-align: center; margin: 0.25in 0.5in 0.3in; font-family: var(--font-whimsy); font-size: 16pt; color: var(--color-brown); line-height: 1.5;">
+      <span style="color: var(--color-gold); letter-spacing: 0.3em; font-size: 10pt;">&#10043; &#10043; &#10043;</span><br>
+      <em>Something was very wrong in the bears&rsquo; little cottage.<br>
+      Someone had come inside while they were away&hellip;</em><br>
+      <span style="color: var(--color-gold); letter-spacing: 0.3em; font-size: 10pt;">&#10043; &#10043; &#10043;</span>
+    </div>
+
+    <div class="narration">
+      <p>In the sitting room, Papa Bear saw that his cushion had been squashed.</p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;SOMEBODY HAS BEEN SITTING IN MY CHAIR!&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--mama">
+        <span class="dialogue-speaker">Mama Bear</span>
+        &ldquo;Somebody has been sitting in my chair!&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--baby">
+        <span class="dialogue-speaker">Baby Bear</span>
+        &ldquo;Somebody has been sitting in my chair &mdash; and they&rsquo;ve BROKEN it all to pieces!&rdquo;
+      </p>
+
+      <p>Poor Baby Bear&rsquo;s eyes filled with tears as he looked at the pile of splintered wood that had once been his favourite little chair.</p>
+
+      <hr class="gold-rule">
+
+      <p>The three bears crept upstairs, their hearts beating fast. In the bedroom, Papa Bear saw that his pillow had been moved.</p>
+
+      <p class="dialogue dialogue--papa">
+        <span class="dialogue-speaker">Papa Bear</span>
+        &ldquo;SOMEBODY HAS BEEN SLEEPING IN MY BED!&rdquo;
+      </p>
+
+      <p class="dialogue dialogue--mama">
+        <span class="dialogue-speaker">Mama Bear</span>
+        &ldquo;Somebody has been sleeping in my bed!&rdquo;
+      </p>
+
+      <p>Then Baby Bear looked at his wee little bed, and there &mdash; with golden curls spread across his pillow &mdash; was&hellip;</p>
+
+      <p class="dialogue dialogue--baby" style="font-size: 16pt; text-align: center;">
+        <span class="dialogue-speaker">Baby Bear</span>
+        &ldquo;Somebody has been sleeping in my bed &mdash;<br>and SHE&rsquo;S STILL HERE!&rdquo;
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 11: THE DISCOVERY SCENE
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+  <div class="page-border-overlay"></div>
+  <span class="chapter-marker">7</span>
+
+  <div class="page-content" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+
+    <img src="images/bears_find_goldilocks.png" alt="Bears discover Goldilocks sleeping"
+         style="width: 5.5in; border-radius: 0.2in;
+                box-shadow: 0 8px 32px rgba(59,42,26,0.22);
+                margin-bottom: 0.3in;">
+
+    <div class="narration" style="text-align: center; max-width: 5.5in;">
+      <p style="text-indent: 0; font-size: 14pt;">Baby Bear&rsquo;s little squeak woke Goldilocks with a start. She opened her eyes and saw three bears staring right at her&thinsp;&mdash;&thinsp;one VERY big, one rather big, and one very small indeed.</p>
+    </div>
+
+    <div class="ornament-divider">
+      &#10043;&ensp;&#10043;&ensp;&#10043;
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 12: GOLDILOCKS RUNS AWAY
+     ============================================================ -->
+<div class="page page--story">
+  <div class="page-bg-texture"></div>
+
+  <div class="page-content" style="padding-top: 0.5in;">
+    <div class="section-heading">Away She Ran!</div>
+
+    <img src="images/goldilocks_running.png" alt="Goldilocks running through the forest"
+         class="img-panoramic"
+         style="height: 4in; margin-top: 0.15in; margin-bottom: 0.25in;
+                border-radius: 0.15in;
+                box-shadow: 0 6px 24px rgba(59,42,26,0.15);">
+
+    <div class="narration" style="font-size: 13.5pt;">
+      <p style="text-indent: 0; text-align: center; font-size: 15pt; font-family: var(--font-dialogue); color: var(--color-brown);">&ldquo;Oh my! Oh my! Oh MY!&rdquo;</p>
+
+      <p>Goldilocks leapt out of the little bed, scrambled down the stairs, burst through the front door, and ran &mdash; oh, how she ran! &mdash; through the forest as fast as her legs could carry her.</p>
+
+      <p>She jumped over logs, ducked under branches, splashed through the stream, and didn&rsquo;t stop running until the little cottage was far, far behind her, hidden among the ancient trees.</p>
+
+      <p style="text-align: center; margin-top: 0.2in;">
+        <span class="ornament-divider">&#10043;&ensp;&#10043;&ensp;&#10043;</span>
+      </p>
+
+      <p>The three bears watched from their doorway as the little golden-haired girl disappeared into the trees. Papa Bear scratched his head. Mama Bear shook hers. And Baby Bear?</p>
+
+      <p>Baby Bear just waved goodbye.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 13: THE END
+     ============================================================ -->
+<div class="page page--ending">
+  <div class="page-bg-texture"></div>
+  <div class="page-border-overlay" style="opacity: 0.08;"></div>
+
+  <div class="page-content" style="padding: 0;">
+    <div class="layout-image-with-overlay">
+      <img src="images/the_end.png" alt="Bears on their porch at sunset, Goldilocks waving in the distance"
+           style="opacity: 0.9;">
+
+      <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+                  background: linear-gradient(to bottom, rgba(255,248,231,0.3) 0%, rgba(255,248,231,0) 30%, rgba(255,248,231,0) 45%, rgba(255,248,231,0.85) 75%, rgba(255,248,231,1) 90%);
+                  z-index: 1;">
+      </div>
+
+      <div style="position: absolute; bottom: 1in; left: 0; right: 0; text-align: center; z-index: 2;">
+        <div class="the-end">The End</div>
+
+        <div style="max-width: 5in; margin: 0 auto;">
+          <div class="narration" style="text-align: center; font-style: italic; font-size: 12pt; color: var(--color-text-light);">
+            <p style="text-indent: 0;">The bears fixed Baby Bear&rsquo;s chair with a little glue and a lot of love. They always locked their door after that &mdash; but they left a little bowl of porridge on the porch, just in case a hungry traveller ever passed by again.</p>
+
+            <p style="text-indent: 0;">And Goldilocks? She never forgot the lesson she learned that day: always ask before you borrow, and never, <em>ever</em> sit in a chair that&rsquo;s too small for you.</p>
+          </div>
+        </div>
+
+        <div style="margin-top: 0.4in;">
+          <svg viewBox="0 0 200 20" style="width: 1.5in; height: 0.15in; color: var(--color-gold);">
+            <use href="#ornament-swirl"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 14: BACK COVER (COLOPHON)
+     ============================================================ -->
+<div class="page" style="page: cover; background: var(--color-cream-dark);">
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; text-align: center; padding: 2in;">
+
+    <svg viewBox="0 0 100 100" style="width: 1in; height: 1in; margin-bottom: 0.4in;">
+      <circle cx="50" cy="50" r="45" fill="none" stroke="#D4A03C" stroke-width="2" opacity="0.4"/>
+      <text x="50" y="42" text-anchor="middle" font-family="'Cinzel Decorative', serif" font-size="18" fill="#6B3A2A" opacity="0.6">&#x2726;</text>
+      <text x="50" y="65" text-anchor="middle" font-family="'Crimson Text', serif" font-size="10" fill="#6B3A2A" opacity="0.5">bears</text>
+    </svg>
+
+    <p style="font-family: var(--font-narration); font-size: 10pt; color: var(--color-text-light); line-height: 1.8; max-width: 4in;">
+      This edition of <em>Goldilocks and the Three Bears</em> was lovingly crafted with custom typography, watercolor illustrations generated by artificial intelligence, and designed for print using modern web technologies.
+    </p>
+
+    <div style="margin-top: 0.3in;">
+      <svg viewBox="0 0 200 20" style="width: 1in; height: 0.12in; color: var(--color-gold);">
+        <use href="#ornament-swirl"/>
+      </svg>
+    </div>
+
+    <p style="font-family: var(--font-whimsy); font-size: 9pt; color: var(--color-text-light); margin-top: 0.3in; opacity: 0.6;">
+      Set in Cinzel Decorative, Playfair Display,<br>
+      Crimson Text, Patrick Hand &amp; Caveat
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
