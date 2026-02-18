@@ -307,9 +307,14 @@ code {
 }
 .screenshot img {
   max-width: 100%;
+  max-height: 3.5in;
   border: 1px solid #E0D8C8;
   border-radius: 0.06in;
   box-shadow: 0 3px 12px rgba(59,42,26,0.12);
+}
+/* Compact screenshots for pages with two images */
+.screenshot--compact img {
+  max-height: 2.6in;
 }
 .screenshot-caption {
   font-family: var(--font-whimsy);
@@ -474,28 +479,26 @@ code {
     </div>
 
     <div class="narration">
-      <p>Log into your Conga environment and behold the dashboard &mdash; your home base. In the <strong>top-left corner</strong> of the screen, you&rsquo;ll find the <strong>App Launcher</strong> icon (it looks like a grid of dots).</p>
-
-      <p>Click it, and a menu of application cards appears. Each card is a <code>&lt;cc-card&gt;</code> web component &mdash; a portal to a different realm.</p>
+      <p>Log into your Conga environment and behold the dashboard &mdash; your home base. You&rsquo;ll see application tiles for each Conga product. Find and click <strong>Admin Console</strong>.</p>
     </div>
 
-    <div class="screenshot">
-      <img src="images/01-dashboard.png" alt="Conga Platform Dashboard with App Launcher">
-      <div class="screenshot-caption">The dashboard &mdash; click the App Launcher (grid icon) in the top-left</div>
+    <div class="screenshot screenshot--compact">
+      <img src="images/01-dashboard.png" alt="Conga Platform Dashboard">
+      <div class="screenshot-caption">The dashboard &mdash; &ldquo;Launch your Conga Experience&rdquo; with application tiles</div>
     </div>
 
     <div class="narration">
-      <p>From the App Launcher menu, find and click the <strong>Admin Console</strong> card to enter the administration realm.</p>
+      <p>The Admin Console is your command center for platform configuration &mdash; users, roles, permissions, and API settings all live here.</p>
+    </div>
+
+    <div class="screenshot screenshot--compact">
+      <img src="images/02-admin-console.png" alt="Admin Console Platform Administration">
+      <div class="screenshot-caption">The Admin Console &mdash; Platform Administration with all configuration tiles</div>
     </div>
 
     <p class="narrator-aside">
       Only those with admin powers may pass through these gates. Choose wisely!
     </p>
-
-    <div class="pro-tip">
-      <div class="pro-tip-label">Playwright Tip</div>
-      <p>The App Launcher cards use Shadow DOM. Target a card by its <code>id</code> attribute on the <code>&lt;cc-card&gt;</code> element, then chain <code>.locator('a[href="/admin"]')</code> to reach the link inside the Shadow Root.</p>
-    </div>
   </div>
 </div>
 
@@ -518,7 +521,7 @@ code {
     </div>
 
     <div class="screenshot">
-      <img src="images/02-admin-users.png" alt="Admin Console Users page">
+      <img src="images/03-users-list.png" alt="Admin Console Users page">
       <div class="screenshot-caption">The Users page &mdash; your army of platform inhabitants</div>
     </div>
 
@@ -536,7 +539,7 @@ code {
 
 
 <!-- ============================================================
-     PAGE 5: CHAPTER 3 - ADD INTEGRATION USER
+     PAGE 5: CHAPTER 3 - ADD INTEGRATION USER (part 1)
      ============================================================ -->
 <div class="page">
   <div class="page-content">
@@ -549,28 +552,22 @@ code {
     <div class="nav-path">Admin Console &rarr; Users &rarr; Add</div>
 
     <div class="narration" style="margin-top: 0.1in;">
-      <p>Click the <strong>Add</strong> button. The <strong>User Details</strong> form appears. This is where the magic happens.</p>
-
-      <p>Fill in the required fields, and &mdash; most importantly &mdash; set the <strong>User Type</strong> to <strong>Integration</strong>.</p>
+      <p>Click the <strong>Add</strong> button. The <strong>User Details</strong> form appears &mdash; defaulting to the &ldquo;Internal&rdquo; user type. We need to change that.</p>
     </div>
 
-    <div class="screenshot">
-      <img src="images/03-add-user-form.png" alt="Add User form with User Type dropdown">
-      <div class="screenshot-caption">The User Details form &mdash; set User Type to &ldquo;Integration&rdquo;</div>
+    <div class="screenshot screenshot--compact">
+      <img src="images/04-add-user-form.png" alt="Add User form defaulting to Internal type">
+      <div class="screenshot-caption">The User Details form &mdash; defaults to &ldquo;Internal&rdquo; user type</div>
     </div>
 
-    <table class="field-table">
-      <thead>
-        <tr><th>Field</th><th>What to Enter</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><strong>First Name</strong></td><td>A descriptive name (e.g., &ldquo;MyApp&rdquo;)</td></tr>
-        <tr><td><strong>Last Name</strong></td><td>Purpose identifier (e.g., &ldquo;Integration&rdquo;)</td></tr>
-        <tr><td><strong>Email</strong></td><td>An email address for the integration user</td></tr>
-        <tr><td><strong>Username</strong></td><td>Same as email (Conga recommends matching these)</td></tr>
-        <tr><td><strong>User Type</strong></td><td><strong>Integration</strong> &larr; This is the key!</td></tr>
-      </tbody>
-    </table>
+    <div class="narration">
+      <p>Click the <strong>User Type</strong> dropdown and select <strong>Integration</strong>. The form simplifies &mdash; Integration users don&rsquo;t need a Username or External ID.</p>
+    </div>
+
+    <div class="screenshot screenshot--compact">
+      <img src="images/05-user-type-dropdown.png" alt="User Type dropdown showing Internal and Integration options">
+      <div class="screenshot-caption">The User Type dropdown &mdash; select &ldquo;Integration&rdquo;</div>
+    </div>
 
     <div class="pro-tip" style="margin-top: 0.1in;">
       <div class="pro-tip-label">What is an Integration User?</div>
@@ -581,7 +578,51 @@ code {
 
 
 <!-- ============================================================
-     PAGE 6: CHAPTER 4 - SAVE & GET CREDENTIALS
+     PAGE 6: CHAPTER 3 CONTINUED - FILL THE FORM
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-heading">Chapter 3 <span style="font-size: 18pt; font-weight: 400;">(continued)</span></div>
+    <div class="step-heading">
+      <span class="step-number">3</span>
+      Fill in the Required Fields
+    </div>
+
+    <div class="narration">
+      <p>With User Type set to <strong>Integration</strong>, fill in the required fields (marked with <strong>*</strong>):</p>
+    </div>
+
+    <table class="field-table">
+      <thead>
+        <tr><th>Field</th><th>What to Enter</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>* First Name</strong></td><td>A descriptive name (e.g., &ldquo;MyApp&rdquo;)</td></tr>
+        <tr><td><strong>* Last Name</strong></td><td>Purpose identifier (e.g., &ldquo;Integration&rdquo;)</td></tr>
+        <tr><td><strong>* Email</strong></td><td>An email address for the integration user</td></tr>
+        <tr><td><strong>* Role</strong></td><td>Search and select a role (e.g., &ldquo;Admin&rdquo;)</td></tr>
+        <tr><td><strong>User Type</strong></td><td><strong>Integration</strong> &larr; This is the key!</td></tr>
+      </tbody>
+    </table>
+
+    <div class="narration" style="margin-top: 0.1in;">
+      <p>Once all required fields are filled, the <strong>Save</strong> button becomes enabled. Here&rsquo;s what a completed form looks like:</p>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/08-form-filled.png" alt="Completed Integration User form ready to save">
+      <div class="screenshot-caption">The completed form &mdash; all required fields filled, Save button enabled</div>
+    </div>
+
+    <p class="narrator-aside">
+      Double-check that Role is set &mdash; Save stays disabled without it!
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: CHAPTER 4 - SAVE & GET CREDENTIALS
      ============================================================ -->
 <div class="page">
   <div class="page-content">
@@ -592,30 +633,28 @@ code {
     </div>
 
     <div class="narration">
-      <p>With the form filled out and User Type set to <strong>Integration</strong>, click the <strong>Save</strong> button.</p>
-
-      <p>A <strong>Credentials popup</strong> immediately appears, revealing the two sacred tokens:</p>
+      <p>Click <strong>Save</strong>. A success toast appears: <em>&ldquo;The data is saved successfully&rdquo;</em> followed by <em>&ldquo;Credentials generated successfully.&rdquo;</em> A <strong>Credentials popup</strong> immediately reveals the two sacred tokens:</p>
     </div>
 
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.15in; margin: 0.12in 0;">
-      <div style="background: var(--color-conga-light); border-radius: 0.08in; padding: 0.15in; text-align: center;">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.15in; margin: 0.1in 0;">
+      <div style="background: var(--color-conga-light); border-radius: 0.08in; padding: 0.12in; text-align: center;">
         <p style="font-family: var(--font-action); font-size: 13pt; color: var(--color-conga-blue); margin-bottom: 0.04in;">Client ID</p>
         <p style="font-family: var(--font-narration); font-size: 10.5pt; color: var(--color-conga-dark);">Your application&rsquo;s public identity. Safe to store in config files and environment variables.</p>
       </div>
-      <div style="background: #FFF3E0; border-radius: 0.08in; padding: 0.15in; text-align: center;">
+      <div style="background: #FFF3E0; border-radius: 0.08in; padding: 0.12in; text-align: center;">
         <p style="font-family: var(--font-action); font-size: 13pt; color: #E65100; margin-bottom: 0.04in;">Client Secret</p>
         <p style="font-family: var(--font-narration); font-size: 10.5pt; color: var(--color-conga-dark);">Your application&rsquo;s private password. Guard this with your life!</p>
       </div>
     </div>
 
     <div class="screenshot">
-      <img src="images/04-credentials-popup.png" alt="Credentials popup showing Client ID and Secret">
+      <img src="images/09-credentials-popup.png" alt="Credentials popup showing Client ID and Secret">
       <div class="screenshot-caption">The Credentials popup &mdash; copy both values immediately!</div>
     </div>
 
     <div class="warning-box">
       <p class="warning-label">Critical Warning!</p>
-      <p class="body">The <strong>Client Secret is shown only once</strong>. Once you dismiss this popup, the secret <em>cannot be recovered</em>. Copy it immediately and store it in a secrets manager or secure environment variable. If lost, navigate to the user&rsquo;s <strong>External Identifier</strong> link and click <strong>Save &amp; Regenerate Client Secret</strong>.</p>
+      <p class="body">The <strong>Client Secret is shown only once</strong>. Once you dismiss this popup, the secret <em>cannot be recovered</em>. Copy it immediately and store it in a secrets manager or secure environment variable. If lost, you can click <strong>Generate Secret</strong> on the user&rsquo;s detail page to regenerate credentials.</p>
     </div>
 
     <p class="narrator-aside">
@@ -626,7 +665,7 @@ code {
 
 
 <!-- ============================================================
-     PAGE 7: CHAPTER 5 - FIRST API CALL
+     PAGE 8: CHAPTER 5 - FIRST API CALL
      ============================================================ -->
 <div class="page">
   <div class="page-content">
@@ -695,7 +734,7 @@ curl <span class="s">https://api.congacloud.com/v1/your-endpoint</span> \
 
 
 <!-- ============================================================
-     PAGE 8: BONUS - REGENERATING SECRETS
+     PAGE 9: BONUS - REGENERATING SECRETS
      ============================================================ -->
 <div class="page">
   <div class="page-content">
@@ -765,7 +804,7 @@ curl <span class="s">https://api.congacloud.com/v1/your-endpoint</span> \
 
 
 <!-- ============================================================
-     PAGE 9: QUEST COMPLETE
+     PAGE 10: QUEST COMPLETE
      ============================================================ -->
 <div class="page" style="page: ending;">
   <div class="page-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
