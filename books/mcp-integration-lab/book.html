@@ -1,0 +1,1542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MCP Integration Lab - Design for Sales Engineers</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --color-primary:      #4F46E5;
+  --color-primary-light: #EEF2FF;
+  --color-primary-dark:  #3730A3;
+  --color-cyan:          #06B6D4;
+  --color-cyan-light:    #ECFEFF;
+  --color-emerald:       #10B981;
+  --color-emerald-light: #ECFDF5;
+  --color-amber:         #F59E0B;
+  --color-amber-light:   #FFFBEB;
+  --color-rose:          #F43F5E;
+  --color-rose-light:    #FFF1F2;
+  --color-slate-900:     #0F172A;
+  --color-slate-700:     #334155;
+  --color-slate-500:     #64748B;
+  --color-slate-300:     #CBD5E1;
+  --color-slate-100:     #F1F5F9;
+  --color-slate-50:      #F8FAFC;
+  --color-white:         #FFFFFF;
+
+  --font-sans:  'Inter', -apple-system, sans-serif;
+  --font-code:  'Fira Code', monospace;
+}
+
+/* ============================================================
+   PAGED MEDIA
+   ============================================================ */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
+}
+@page :left {
+  @bottom-left {
+    content: counter(page);
+    font-family: var(--font-sans);
+    font-size: 8pt;
+    color: var(--color-slate-500);
+    margin-left: 0.75in;
+    margin-bottom: 0.35in;
+  }
+}
+@page :right {
+  @bottom-right {
+    content: counter(page);
+    font-family: var(--font-sans);
+    font-size: 8pt;
+    color: var(--color-slate-500);
+    margin-right: 0.75in;
+    margin-bottom: 0.35in;
+  }
+}
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page back { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 11pt; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-slate-700);
+  line-height: 1.55;
+}
+
+.page {
+  width: 8.5in;
+  height: 11in;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  page-break-inside: avoid;
+  background: var(--color-white);
+}
+.page:last-child { page-break-after: auto; }
+
+.page-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0.6in 0.7in;
+  z-index: 1;
+}
+
+/* ============================================================
+   COVER
+   ============================================================ */
+.page--cover {
+  page: cover;
+  background: linear-gradient(135deg, var(--color-slate-900) 0%, #1E1B4B 50%, var(--color-primary-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cover-inner {
+  text-align: center;
+  padding: 0.75in 1in;
+  width: 100%;
+}
+.cover-badge {
+  display: inline-block;
+  background: rgba(79,70,229,0.3);
+  border: 1px solid rgba(79,70,229,0.5);
+  border-radius: 100px;
+  padding: 0.06in 0.25in;
+  font-size: 9pt;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4in;
+}
+.cover-title {
+  font-size: 34pt;
+  font-weight: 800;
+  color: var(--color-white);
+  line-height: 1.15;
+  margin-bottom: 0.15in;
+}
+.cover-title span {
+  background: linear-gradient(135deg, #818CF8, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cover-subtitle {
+  font-size: 14pt;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 0.5in;
+  line-height: 1.5;
+}
+.cover-rule {
+  width: 2in;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-cyan), transparent);
+  margin: 0.3in auto;
+}
+.cover-meta {
+  font-size: 10pt;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+}
+.cover-meta strong {
+  color: rgba(255,255,255,0.8);
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.section-label {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.06in;
+}
+.page-title {
+  font-size: 20pt;
+  font-weight: 800;
+  color: var(--color-slate-900);
+  line-height: 1.2;
+  margin-bottom: 0.12in;
+}
+.page-subtitle {
+  font-size: 11pt;
+  color: var(--color-slate-500);
+  margin-bottom: 0.15in;
+  line-height: 1.5;
+}
+h3 {
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin: 0.12in 0 0.06in;
+}
+h4 {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--color-slate-700);
+  margin: 0.08in 0 0.04in;
+}
+p {
+  font-size: 10.5pt;
+  line-height: 1.55;
+  margin-bottom: 0.06in;
+}
+.small {
+  font-size: 9.5pt;
+}
+.text-muted {
+  color: var(--color-slate-500);
+}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+
+/* Objective cards */
+.obj-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.08in;
+  margin: 0.08in 0;
+}
+.obj-card {
+  display: flex;
+  gap: 0.12in;
+  align-items: flex-start;
+  background: var(--color-slate-50);
+  border-radius: 0.06in;
+  padding: 0.1in 0.12in;
+  border-left: 3px solid var(--color-primary);
+}
+.obj-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0.24in;
+  height: 0.24in;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  font-size: 9pt;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.obj-text {
+  font-size: 10pt;
+  line-height: 1.45;
+}
+.obj-text strong {
+  color: var(--color-slate-900);
+}
+
+/* Flow timeline */
+.flow-step {
+  display: flex;
+  gap: 0.12in;
+  margin-bottom: 0.08in;
+  align-items: flex-start;
+}
+.flow-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 0.3in;
+}
+.flow-dot {
+  width: 0.22in;
+  height: 0.22in;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8pt;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+.flow-line {
+  width: 2px;
+  flex-grow: 1;
+  min-height: 0.08in;
+  background: var(--color-slate-300);
+}
+.flow-body {
+  flex: 1;
+  padding-bottom: 0.04in;
+}
+.flow-title {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: 0.02in;
+}
+.flow-desc {
+  font-size: 9.5pt;
+  color: var(--color-slate-500);
+  line-height: 1.4;
+}
+.flow-time {
+  font-size: 8pt;
+  font-weight: 600;
+  color: var(--color-cyan);
+  margin-left: 0.06in;
+}
+
+/* Info boxes */
+.info-box {
+  border-radius: 0.06in;
+  padding: 0.1in 0.12in;
+  margin: 0.08in 0;
+}
+.info-box--blue {
+  background: var(--color-primary-light);
+  border-left: 3px solid var(--color-primary);
+}
+.info-box--cyan {
+  background: var(--color-cyan-light);
+  border-left: 3px solid var(--color-cyan);
+}
+.info-box--green {
+  background: var(--color-emerald-light);
+  border-left: 3px solid var(--color-emerald);
+}
+.info-box--amber {
+  background: var(--color-amber-light);
+  border-left: 3px solid var(--color-amber);
+}
+.info-box--rose {
+  background: var(--color-rose-light);
+  border-left: 3px solid var(--color-rose);
+}
+.info-box-label {
+  font-size: 9pt;
+  font-weight: 700;
+  margin-bottom: 0.02in;
+}
+.info-box p {
+  font-size: 9.5pt;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Code blocks */
+.code-block {
+  background: var(--color-slate-900);
+  color: #E2E8F0;
+  font-family: var(--font-code);
+  font-size: 8pt;
+  line-height: 1.5;
+  padding: 0.1in 0.12in;
+  border-radius: 0.06in;
+  margin: 0.06in 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+.code-block .comment { color: #64748B; }
+.code-block .string { color: #86EFAC; }
+.code-block .key { color: #93C5FD; }
+.code-block .value { color: #FDE68A; }
+.code-block .fn { color: #C4B5FD; }
+
+code {
+  font-family: var(--font-code);
+  font-size: 9pt;
+  background: var(--color-slate-100);
+  padding: 0.01in 0.04in;
+  border-radius: 0.02in;
+  color: var(--color-primary-dark);
+}
+
+/* Architecture diagram */
+.arch-diagram {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 0.15in 0;
+  flex-wrap: nowrap;
+}
+.arch-box {
+  border-radius: 0.08in;
+  padding: 0.12in 0.1in;
+  text-align: center;
+  min-width: 1.1in;
+  flex-shrink: 0;
+}
+.arch-box-label {
+  font-size: 7.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.03in;
+}
+.arch-box-name {
+  font-size: 9pt;
+  font-weight: 600;
+}
+.arch-box-desc {
+  font-size: 7pt;
+  margin-top: 0.02in;
+  opacity: 0.7;
+}
+.arch-arrow {
+  font-size: 14pt;
+  color: var(--color-slate-300);
+  padding: 0 0.04in;
+  flex-shrink: 0;
+}
+
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.06in 0;
+  font-size: 9.5pt;
+}
+.data-table th {
+  background: var(--color-slate-100);
+  font-weight: 700;
+  text-align: left;
+  padding: 0.05in 0.08in;
+  border-bottom: 2px solid var(--color-slate-300);
+  font-size: 9pt;
+  color: var(--color-slate-700);
+}
+.data-table td {
+  padding: 0.04in 0.08in;
+  border-bottom: 1px solid var(--color-slate-100);
+  vertical-align: top;
+}
+
+/* Bullet lists */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.04in 0;
+}
+.bullet-list li {
+  font-size: 10pt;
+  line-height: 1.45;
+  padding: 0.02in 0 0.02in 0.2in;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '';
+  position: absolute;
+  left: 0.04in;
+  top: 0.1in;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+.bullet-list--cyan li::before { background: var(--color-cyan); }
+.bullet-list--green li::before { background: var(--color-emerald); }
+.bullet-list--amber li::before { background: var(--color-amber); }
+
+/* Checklist */
+.check-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.04in 0;
+}
+.check-list li {
+  font-size: 9.5pt;
+  line-height: 1.4;
+  padding: 0.02in 0 0.02in 0.22in;
+  position: relative;
+}
+.check-list li::before {
+  content: '\2713';
+  position: absolute;
+  left: 0;
+  color: var(--color-emerald);
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+/* Section divider */
+.divider {
+  border: none;
+  height: 1px;
+  background: var(--color-slate-200);
+  margin: 0.12in 0;
+}
+
+/* Section images */
+.section-img {
+  width: 100%;
+  border-radius: 0.08in;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  display: block;
+}
+.section-img--small {
+  max-width: 3.2in;
+}
+.section-img--float-right {
+  float: right;
+  margin: 0 0 0.1in 0.15in;
+}
+.section-img--float-left {
+  float: left;
+  margin: 0 0.15in 0.1in 0;
+}
+.cover-hero-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.18;
+  z-index: 0;
+}
+
+/* Two-column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.15in;
+}
+
+/* Activity block */
+.activity-block {
+  background: var(--color-slate-50);
+  border-radius: 0.06in;
+  padding: 0.1in 0.12in;
+  margin: 0.06in 0;
+}
+.activity-label {
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.03in;
+}
+.done-label {
+  font-size: 8.5pt;
+  font-weight: 700;
+  color: var(--color-emerald);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.04in;
+  margin-bottom: 0.02in;
+}
+
+/* Phrase cards */
+.phrase-card {
+  background: var(--color-slate-900);
+  color: var(--color-white);
+  border-radius: 0.06in;
+  padding: 0.08in 0.12in;
+  margin: 0.05in 0;
+  font-size: 9.5pt;
+  font-style: italic;
+  line-height: 1.45;
+  border-left: 3px solid var(--color-cyan);
+}
+
+/* Tag/pill */
+.tag {
+  display: inline-block;
+  font-size: 7.5pt;
+  font-weight: 700;
+  padding: 0.01in 0.08in;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.tag--purple { background: var(--color-primary-light); color: var(--color-primary); }
+.tag--cyan { background: var(--color-cyan-light); color: #0E7490; }
+.tag--green { background: var(--color-emerald-light); color: #047857; }
+.tag--amber { background: var(--color-amber-light); color: #B45309; }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PAGE 1: COVER
+     ============================================================ -->
+<div class="page page--cover">
+  <img src="images/cover.png" class="cover-hero-img" alt="">
+  <div class="cover-inner" style="position: relative; z-index: 1;">
+    <div class="cover-badge">Technical Enablement Assignment</div>
+
+    <h1 class="cover-title">MCP Integration Lab<br><span>Design for Sales Engineers</span></h1>
+    <p class="cover-subtitle">Agent calling a mock enterprise search API via Model Context Protocol</p>
+
+    <div class="cover-rule"></div>
+
+    <p class="cover-meta">
+      <strong>Prepared by</strong> John Yzaguirre<br>
+      <strong>Role</strong> Technical Enablement Manager<br>
+      <strong>Duration</strong> 60-90 minute hands-on lab
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 2: TITLE, AUDIENCE, PREREQUISITES
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Part 1 &mdash; Lab Outline</div>
+    <div class="page-title">Lab overview</div>
+    <p class="page-subtitle">Title, audience, prerequisites, and what SEs will be able to do after completing this lab.</p>
+
+    <h3 style="margin-top: 0.1in;">Title</h3>
+    <p><strong>MCP Integration Lab: Agent calling a mock enterprise search API via MCP</strong></p>
+    <p class="small text-muted">A hands-on lab where Sales Engineers wire an AI agent to a mock enterprise search endpoint using Model Context Protocol, then validate grounded, citation-backed answers.</p>
+
+    <div class="two-col" style="margin-top: 0.15in;">
+      <div>
+        <h3>Audience</h3>
+        <p class="small">Technical presales: SEs, SAs, and AIOMs who are comfortable with HTTP APIs and basic cloud concepts, but may be <strong>new to MCP</strong> and this specific integration pattern.</p>
+
+        <h3 style="margin-top: 0.12in;">Prerequisites</h3>
+        <ul class="bullet-list">
+          <li>Basic terminal/CLI use</li>
+          <li>JSON literacy (read and write)</li>
+          <li>Python familiarity (read, modify, run)</li>
+          <li>AWS account access (provided)</li>
+          <li>Conceptual understanding of LLMs</li>
+        </ul>
+      </div>
+      <div>
+        <h3>Format</h3>
+        <ul class="bullet-list">
+          <li><strong>Duration:</strong> 60-90 minutes</li>
+          <li><strong>Delivery:</strong> Instructor-led, hands-on</li>
+          <li><strong>Environment:</strong> AWS (Lambda + CloudShell)</li>
+          <li><strong>Language:</strong> Python 3.12</li>
+          <li><strong>Tools:</strong> MCP Python SDK, MCP Inspector</li>
+        </ul>
+
+        <div class="info-box info-box--blue" style="margin-top: 0.1in;">
+          <div class="info-box-label" style="color: var(--color-primary);">Why "search" not "model"?</div>
+          <p>Enterprise search mirrors how customers actually use Glean: <em>retrieve authoritative context first, generate grounded answers second</em>. This is the integration story SEs need to tell.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 0.15in;">Learning objectives</h3>
+    <p class="small text-muted" style="margin-bottom: 0.06in;">After this lab, each SE can:</p>
+
+    <div class="obj-grid">
+      <div class="obj-card">
+        <span class="obj-num">1</span>
+        <div class="obj-text"><strong>Explain MCP's mental model</strong>&mdash;describe the client-server architecture, the three capability primitives (tools, resources, prompts), and where schemas live.</div>
+      </div>
+      <div class="obj-card">
+        <span class="obj-num">2</span>
+        <div class="obj-text"><strong>Deploy a mock enterprise search API</strong>&mdash;stand up a serverless endpoint on AWS Lambda with a realistic /search contract and structured metadata.</div>
+      </div>
+      <div class="obj-card">
+        <span class="obj-num">3</span>
+        <div class="obj-text"><strong>Wire an MCP server tool</strong>&mdash;implement a <code>kb_search(query, top_k)</code> tool using the official Python SDK that calls the endpoint and returns structured results.</div>
+      </div>
+      <div class="obj-card">
+        <span class="obj-num">4</span>
+        <div class="obj-text"><strong>Validate grounded answers</strong>&mdash;confirm the agent's response aligns with returned documents, includes citations, and respects permission boundaries.</div>
+      </div>
+      <div class="obj-card">
+        <span class="obj-num">5</span>
+        <div class="obj-text"><strong>Troubleshoot integration failures</strong>&mdash;use MCP Inspector, server logs, and CloudWatch to isolate faults across client, server, and endpoint layers.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3: ARCHITECTURE DIAGRAM
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Architecture</div>
+    <div class="page-title">Integration pattern overview</div>
+    <p class="page-subtitle">The three-layer architecture SEs will build and learn to explain to customers.</p>
+
+    <!-- Architecture diagram -->
+    <div style="margin: 0.2in 0;">
+      <div class="arch-diagram">
+        <div class="arch-box" style="background: var(--color-primary-light); border: 2px solid var(--color-primary); color: var(--color-primary-dark);">
+          <div class="arch-box-label" style="color: var(--color-primary);">Layer 1</div>
+          <div class="arch-box-name">Agent / UI</div>
+          <div class="arch-box-desc">User prompt<br>LLM reasoning</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box" style="background: var(--color-primary-light); border: 2px solid var(--color-primary); color: var(--color-primary-dark);">
+          <div class="arch-box-label" style="color: var(--color-primary);">Transport</div>
+          <div class="arch-box-name">MCP Client</div>
+          <div class="arch-box-desc">Tool discovery<br>JSON-RPC</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box" style="background: var(--color-cyan-light); border: 2px solid var(--color-cyan); color: #0E7490;">
+          <div class="arch-box-label" style="color: var(--color-cyan);">MCP Layer</div>
+          <div class="arch-box-name">MCP Server</div>
+          <div class="arch-box-desc">kb_search() tool<br>Schema + trust</div>
+        </div>
+        <div class="arch-arrow">&rarr;</div>
+        <div class="arch-box" style="background: var(--color-emerald-light); border: 2px solid var(--color-emerald); color: #047857;">
+          <div class="arch-box-label" style="color: var(--color-emerald);">Enterprise</div>
+          <div class="arch-box-name">Mock Search API</div>
+          <div class="arch-box-desc">Lambda + HTTPS<br>Ranked results</div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 0.1in;">
+        <div class="arch-diagram">
+          <div class="arch-box" style="background: var(--color-emerald-light); border: 2px solid var(--color-emerald); color: #047857; min-width: auto;">
+            <div class="arch-box-name" style="font-size: 8pt;">Ranked Results JSON</div>
+          </div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-box" style="background: var(--color-cyan-light); border: 2px solid var(--color-cyan); color: #0E7490; min-width: auto;">
+            <div class="arch-box-name" style="font-size: 8pt;">Structured Payload</div>
+          </div>
+          <div class="arch-arrow">&rarr;</div>
+          <div class="arch-box" style="background: var(--color-primary-light); border: 2px solid var(--color-primary); color: var(--color-primary-dark); min-width: auto;">
+            <div class="arch-box-name" style="font-size: 8pt;">Grounded Answer + Citations</div>
+          </div>
+        </div>
+        <p class="small text-muted" style="margin-top: 0.06in;">Response flow: enterprise data grounds the agent's answer with verifiable sources</p>
+      </div>
+    </div>
+
+    <h3>Why this pattern matters for customers</h3>
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div>
+        <div class="info-box info-box--blue">
+          <div class="info-box-label" style="color: var(--color-primary);">Standard protocol</div>
+          <p>MCP replaces bespoke API integrations with a universal connector surface. One protocol, many enterprise systems.</p>
+        </div>
+        <div class="info-box info-box--green">
+          <div class="info-box-label" style="color: var(--color-emerald);">Grounded answers</div>
+          <p>RAG pattern: retrieve authoritative context, <em>then</em> generate. Reduces hallucination, increases trust.</p>
+        </div>
+      </div>
+      <div>
+        <div class="info-box info-box--cyan">
+          <div class="info-box-label" style="color: #0E7490;">Tool discovery</div>
+          <p>Agents discover available tools dynamically via MCP schema. No hardcoded integrations, just declare and connect.</p>
+        </div>
+        <div class="info-box info-box--amber">
+          <div class="info-box-label" style="color: #B45309;">Enterprise governance</div>
+          <p>Permission-aware results, audit trails, OAuth-aligned auth. The agent only sees what the user is allowed to see.</p>
+        </div>
+      </div>
+    </div>
+
+    <h3>MCP primitives covered in this lab</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>Primitive</th><th>What it does</th><th>Lab usage</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Tools</strong></td><td>Callable functions for API calls and side effects</td><td><code>kb_search(query, top_k)</code></td></tr>
+        <tr><td><strong>Resources</strong></td><td>Read-only data artifacts (file-like context)</td><td>Discussed, not implemented</td></tr>
+        <tr><td><strong>Prompts</strong></td><td>Reusable prompt templates exposed by server</td><td>Discussed, not implemented</td></tr>
+      </tbody>
+    </table>
+    <p class="small text-muted">The lab focuses on Tools because they are the most common primitive in customer integration conversations and map directly to "agent calls enterprise system."</p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4: LAB FLOW OVERVIEW
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Lab flow</div>
+    <div class="page-title">High-level lab flow</div>
+    <p class="page-subtitle">Seven sections from customer context through hands-on wiring to a repeatable demo narrative.</p>
+
+    <div style="margin-top: 0.1in;">
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-primary);">1</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">Intro and customer story <span class="flow-time">~8 min</span></div>
+          <div class="flow-desc">Establish the narrative: "agents call enterprise systems via a standard protocol." Learners sketch the four-box architecture and understand where schemas and trust boundaries live. This sets up every customer conversation they will have.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-primary);">2</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">Cloud environment setup <span class="flow-time">~10 min</span></div>
+          <div class="flow-desc">Open AWS CloudShell, pick a region, create an IAM role for Lambda, confirm logging works. Minimal setup, maximum time for the interesting parts. Done: learner can invoke a Lambda and find its CloudWatch log group.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-cyan);">3</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">Deploy mock enterprise search API <span class="flow-time">~15 min</span></div>
+          <div class="flow-desc">Implement the <code>/search</code> contract on Lambda with Function URL. Query in, ranked results out, with titles, snippets, relevance scores, and ACL groups. Deterministic data for reproducible validation. Done: <code>curl</code> returns structured JSON for sample queries.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-cyan);">4</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">MCP server wiring <span class="flow-time">~15 min</span></div>
+          <div class="flow-desc">Build an MCP server using the Python SDK (FastMCP). Define <code>kb_search(query, top_k)</code> as a tool, wire it to the mock endpoint, use stdio transport. Done: MCP Inspector discovers the tool and shows input schema plus output shape.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-emerald);">5</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">End-to-end query validation <span class="flow-time">~15 min</span></div>
+          <div class="flow-desc">Run a realistic SE scenario query ("What is our Q4 renewal process?"). Show the agent using the MCP tool, receiving results, producing a grounded answer with citations. Validate relevance, grounding, and permissions. Done: learner can explain where grounding happens.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-amber);">6</div>
+          <div class="flow-line"></div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">Troubleshooting and debugging <span class="flow-time">~12 min</span></div>
+          <div class="flow-desc">Deliberately break one layer (wrong URL, schema mismatch, stdout corruption), then fix it. Teach the "client, server, endpoint" fault isolation pattern. Done: learner can isolate the fault domain in under five minutes.</div>
+        </div>
+      </div>
+
+      <div class="flow-step">
+        <div class="flow-marker">
+          <div class="flow-dot" style="background: var(--color-rose);">7</div>
+        </div>
+        <div class="flow-body">
+          <div class="flow-title">Wrap-up and customer positioning <span class="flow-time">~10 min</span></div>
+          <div class="flow-desc">Convert lab experience into a repeatable talk track: "standard protocol," "tool discovery," "governance," "permissions." Done: learner can deliver a two-minute positioning narrative and a one-minute "how it works" explanation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5: SECTIONS 1-2 DETAIL
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Sections 1-2 detail</div>
+    <div class="page-title">Intro, customer story, and environment setup</div>
+
+    <h3>Section 1: Intro and customer story</h3>
+    <p class="small">This is the most important section. Before touching any code, SEs need to internalize the customer narrative. Every technical decision in the lab ties back to a real customer conversation.</p>
+
+    <div class="activity-block">
+      <div class="activity-label" style="color: var(--color-primary);">Core activities</div>
+      <ul class="bullet-list">
+        <li>Facilitator presents the enterprise integration challenge: "Your customer's agents need controlled access to real enterprise systems. How do you connect them without building a bespoke integration for every system?"</li>
+        <li>Learners sketch the four-box architecture on paper or whiteboard: Agent &rarr; MCP Client &rarr; MCP Server &rarr; Enterprise API</li>
+        <li>Discuss trust boundaries: where does the schema live? Who controls what the agent can call?</li>
+      </ul>
+      <div class="done-label">Done looks like</div>
+      <p class="small">Learner can draw the four boxes, label them, explain where tool schemas are defined, and articulate why a standard protocol matters over custom integrations.</p>
+    </div>
+
+    <div class="info-box info-box--blue">
+      <div class="info-box-label" style="color: var(--color-primary);">Facilitator tip</div>
+      <p>Ask: "How many different APIs does your largest customer integrate with today?" This grounds the abstract protocol in real pain. MCP's value is proportional to the number of systems an agent needs to reach.</p>
+    </div>
+
+    <hr class="divider">
+
+    <h3>Section 2: Cloud environment setup (AWS)</h3>
+    <p class="small">Minimal infrastructure to maximize time on the interesting parts. AWS Lambda with Function URLs provides a dedicated HTTPS endpoint without requiring API Gateway.</p>
+
+    <div class="activity-block">
+      <div class="activity-label" style="color: var(--color-primary);">Core activities</div>
+      <ul class="bullet-list">
+        <li>Open AWS CloudShell (pre-authenticated, no local install needed)</li>
+        <li>Pick a region (us-east-1 for lowest latency in lab)</li>
+        <li>Create an IAM execution role for Lambda with basic CloudWatch permissions</li>
+        <li>Create a "hello world" Lambda function and invoke it to confirm the toolchain works</li>
+        <li>Find the CloudWatch log group for the function</li>
+      </ul>
+      <div class="done-label">Done looks like</div>
+      <p class="small">Learner can invoke a Lambda function once and find its log output in CloudWatch. The infrastructure foundation is confirmed working.</p>
+    </div>
+
+    <div class="info-box info-box--amber">
+      <div class="info-box-label" style="color: #B45309;">Why AWS over GCP or Azure?</div>
+      <p>Lambda Function URLs provide a direct HTTPS endpoint without extra gateway configuration. CloudShell eliminates local CLI setup. The lean serverless footprint means minimal infrastructure overhead for a 60-90 minute lab. In a real deployment, any cloud provider works&mdash;MCP is cloud-agnostic.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6: SECTION 3 DETAIL
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Section 3 detail</div>
+    <div class="page-title">Deploy mock enterprise search API</div>
+    <p class="page-subtitle">The mock endpoint is designed to be <em>simple but realistic</em>&mdash;enough metadata to validate relevance, grounding, and permissions.</p>
+
+    <img src="images/search_api.png" class="section-img" style="margin: 0.1in 0; max-height: 2in; object-fit: cover; width: 100%;" alt="Search API">
+
+    <h4>Mock /search contract</h4>
+    <div class="code-block"><span class="comment"># Request</span>
+GET /search?q=<span class="value">quarterly+renewal+process</span>&top_k=<span class="value">3</span>
+
+<span class="comment"># Response</span>
+{
+  <span class="key">"query"</span>: <span class="string">"quarterly renewal process"</span>,
+  <span class="key">"results"</span>: [
+    {
+      <span class="key">"doc_id"</span>: <span class="string">"DOC-042"</span>,
+      <span class="key">"title"</span>: <span class="string">"Q4 2024 Renewal Playbook"</span>,
+      <span class="key">"snippet"</span>: <span class="string">"Standard renewal process begins 90 days..."</span>,
+      <span class="key">"url"</span>: <span class="string">"https://wiki.acme.co/renewals/q4-2024"</span>,
+      <span class="key">"score"</span>: <span class="value">0.94</span>,
+      <span class="key">"acl_group"</span>: <span class="string">"sales-team"</span>
+    }
+  ]
+}</div>
+
+    <div class="activity-block">
+      <div class="activity-label" style="color: var(--color-primary);">Core activities</div>
+      <ul class="bullet-list">
+        <li>Deploy the search Lambda with deterministic canned documents (5-8 docs across 2-3 query topics)</li>
+        <li>Enable Lambda Function URL with auth type NONE (lab simplification; note production requires auth)</li>
+        <li>Test with <code>curl</code> and confirm structured JSON response</li>
+      </ul>
+      <div class="done-label">Done looks like</div>
+      <p class="small"><code>curl</code> returns deterministic JSON for at least two different sample queries.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: SECTION 4 DETAIL
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Section 4 detail</div>
+    <div class="page-title">MCP server wiring</div>
+    <p class="page-subtitle">Build an MCP server using the official Python SDK (FastMCP). One tool, one schema, stdio transport.</p>
+
+    <img src="images/mcp_server_wiring.png" class="section-img" style="margin: 0.1in 0; max-height: 2in; object-fit: cover; width: 100%;" alt="MCP server wiring">
+
+    <h4>MCP server tool definition</h4>
+    <div class="code-block"><span class="key">from</span> mcp.server.fastmcp <span class="key">import</span> FastMCP
+<span class="key">import</span> httpx, sys, json
+
+mcp = FastMCP(<span class="string">"enterprise-search"</span>)
+
+<span class="fn">@mcp.tool()</span>
+<span class="key">async def</span> <span class="fn">kb_search</span>(query: <span class="value">str</span>, top_k: <span class="value">int</span> = <span class="value">3</span>) -> <span class="value">str</span>:
+    <span class="string">"""Search the enterprise knowledge base.
+    Returns ranked results with titles, snippets, and permissions."""</span>
+    url = f<span class="string">"{ENDPOINT}/search?q={query}&top_k={top_k}"</span>
+    <span class="comment"># Log to stderr, NEVER stdout (stdout = JSON-RPC)</span>
+    print(f<span class="string">"Calling: {url}"</span>, file=sys.stderr)
+    resp = <span class="key">await</span> httpx.AsyncClient().get(url)
+    <span class="key">return</span> json.dumps(resp.json())</div>
+
+    <div class="two-col" style="margin-top: 0.08in;">
+      <div class="info-box info-box--cyan">
+        <div class="info-box-label" style="color: #0E7490;">Why stdio transport?</div>
+        <p>Reduces setup to zero&mdash;no HTTP server, no OAuth, no Origin validation. Keeps focus on tool schema and integration flow. Streamable HTTP is the production transport; we teach it conceptually.</p>
+      </div>
+      <div class="info-box info-box--rose">
+        <div class="info-box-label" style="color: var(--color-rose);">Critical rule: stdout is sacred</div>
+        <p>For stdio servers, <code>stdout</code> must only contain JSON-RPC frames. All logging goes to <code>stderr</code>. This is the #1 real-world failure mode&mdash;we make it a teachable moment.</p>
+      </div>
+    </div>
+
+    <div style="margin-top: 0.06in;">
+      <div class="done-label" style="margin-top: 0;">Done looks like</div>
+      <p class="small">MCP Inspector discovers the <code>kb_search</code> tool, shows the input schema (<code>query: str, top_k: int</code>), and the output JSON shape.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: SECTION 5 DETAIL
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Section 5 detail</div>
+    <div class="page-title">End-to-end query validation</div>
+
+    <h3>Section 5: End-to-end query validation</h3>
+    <p class="small">The moment of truth. Run a realistic SE scenario query and prove the integration works end-to-end.</p>
+
+    <div class="activity-block">
+      <div class="activity-label" style="color: var(--color-primary);">Core activities</div>
+      <ul class="bullet-list">
+        <li>Run a scenario query: <em>"What is our Q4 renewal process?"</em></li>
+        <li>Trace the flow: user prompt &rarr; agent selects kb_search tool &rarr; MCP client sends JSON-RPC call &rarr; server calls mock API &rarr; results return &rarr; agent synthesizes answer with citations</li>
+        <li>Validate three dimensions of "meaningful results":</li>
+      </ul>
+    </div>
+
+    <table class="data-table" style="margin-top: 0.06in;">
+      <thead>
+        <tr><th>Validation dimension</th><th>What to check</th><th>Why it matters</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag--purple">Relevance</span></td>
+          <td>Top-k results match the query intent; scores are reasonable</td>
+          <td>Proves the search layer is working</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--cyan">Grounding</span></td>
+          <td>Agent's answer references returned documents, not free-text hallucination</td>
+          <td>Core RAG value proposition for customers</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--green">Permissions</span></td>
+          <td>Results include <code>acl_group</code>; agent respects access boundaries</td>
+          <td>Enterprise-grade governance story</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="done-label">Done looks like</div>
+    <p class="small">Learners can explain where grounding happens and point to which document snippet supported each claim in the agent's response.</p>
+
+    <img src="images/validation_flow.png" class="section-img" style="max-height: 2in; margin-top: 0.12in;" alt="End-to-end validation flow">
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8: SECTION 6 DETAIL
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Section 6 detail</div>
+    <div class="page-title">Troubleshooting and debugging</div>
+
+    <h3>Section 6: Troubleshooting and debugging</h3>
+    <p class="small">Deliberately break one layer, then fix it. This builds the confidence SEs need to troubleshoot during live demos and customer POVs.</p>
+
+    <h4>Failure scenarios to practice</h4>
+    <table class="data-table">
+      <thead>
+        <tr><th>Break this</th><th>Symptom</th><th>Debug with</th><th>Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Wrong endpoint URL</td>
+          <td>Tool call fails silently or returns error</td>
+          <td>MCP Inspector + server stderr</td>
+          <td>Correct the ENDPOINT variable</td>
+        </tr>
+        <tr>
+          <td>Schema mismatch</td>
+          <td>Tool discovered but wrong args</td>
+          <td>MCP Inspector schema tab</td>
+          <td>Align tool signature with expected schema</td>
+        </tr>
+        <tr>
+          <td>stdout corruption</td>
+          <td>Server "breaks randomly"</td>
+          <td>Check for print() without file=stderr</td>
+          <td>Redirect all logs to stderr</td>
+        </tr>
+        <tr>
+          <td>Lambda error (500)</td>
+          <td>Mock API returns error</td>
+          <td>CloudWatch logs</td>
+          <td>Fix Lambda handler code</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box info-box--green" style="margin-top: 0.08in;">
+      <div class="info-box-label" style="color: var(--color-emerald);">Triage pattern: "client, server, endpoint"</div>
+      <p>Teach SEs to isolate fault domains in order: (1) Does MCP Inspector see the tool? If not, it's a <strong>server</strong> problem. (2) Does the tool call return data? If not, it's an <strong>endpoint</strong> problem. (3) Does the agent use the data correctly? If not, it's a <strong>client/agent</strong> problem.</p>
+    </div>
+
+    <div class="done-label">Done looks like</div>
+    <p class="small">Learner can isolate the fault domain in under five minutes using the three-layer triage pattern and the right debugging tool for each layer.</p>
+
+    <img src="images/troubleshooting_tree.png" class="section-img" style="max-height: 2in; margin-top: 0.12in;" alt="Troubleshooting triage">
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8: SECTION 7 + SUCCESS CRITERIA
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Section 7 + success criteria</div>
+    <div class="page-title">Wrap-up, positioning, and success criteria</div>
+
+    <h3>Section 7: Wrap-up and customer positioning</h3>
+    <p class="small">Convert hands-on experience into customer-ready talk tracks. This is where lab knowledge becomes demo confidence.</p>
+
+    <div class="activity-block">
+      <div class="activity-label" style="color: var(--color-primary);">Core activities</div>
+      <ul class="bullet-list">
+        <li>Each learner practices a <strong>two-minute positioning narrative</strong> with a partner: "Here's what MCP does, here's why it matters for your enterprise integration story"</li>
+        <li>Each learner practices a <strong>one-minute "how it works"</strong> explanation using the architecture diagram</li>
+        <li>Group discussion: "What's the production delta?" Cover auth, Origin validation, least privilege, prompt injection risk controls</li>
+      </ul>
+      <div class="done-label">Done looks like</div>
+      <p class="small">Learner can deliver both narratives unprompted, and articulate three things they would add for a production deployment.</p>
+    </div>
+
+    <div class="info-box info-box--cyan">
+      <div class="info-box-label" style="color: #0E7490;">The production delta conversation</div>
+      <p>SEs will be asked "Is this production-ready?" in every demo. Teach them to answer confidently: "The protocol is production-ready. For your environment, we'd add OAuth-aligned authorization, Origin header validation for HTTP transports, and least-privilege tool scoping. Let me show you what that looks like."</p>
+    </div>
+
+    <hr class="divider">
+
+    <h3 style="margin-top: 0.1in;">Overall success criteria</h3>
+    <p class="small text-muted">How the SE and the facilitator know the lab achieved its goals.</p>
+
+    <div style="margin-top: 0.08in;">
+      <div class="obj-grid">
+        <div class="obj-card" style="border-left-color: var(--color-emerald);">
+          <span class="obj-num" style="background: var(--color-emerald);">&#10003;</span>
+          <div class="obj-text"><strong>End-to-end success:</strong> Each learner can run one query through MCP to the mock search API and receive a grounded, citation-backed answer.</div>
+        </div>
+        <div class="obj-card" style="border-left-color: var(--color-emerald);">
+          <span class="obj-num" style="background: var(--color-emerald);">&#10003;</span>
+          <div class="obj-text"><strong>Vocabulary fluency:</strong> Each learner can describe the flow using correct terms&mdash;tool schema, JSON-RPC transport, stdio vs Streamable HTTP, MCP Inspector debugging surfaces.</div>
+        </div>
+        <div class="obj-card" style="border-left-color: var(--color-emerald);">
+          <span class="obj-num" style="background: var(--color-emerald);">&#10003;</span>
+          <div class="obj-text"><strong>Production awareness:</strong> Each learner can articulate the production delta&mdash;auth, Origin validation, least privilege, prompt injection risk controls.</div>
+        </div>
+        <div class="obj-card" style="border-left-color: var(--color-emerald);">
+          <span class="obj-num" style="background: var(--color-emerald);">&#10003;</span>
+          <div class="obj-text"><strong>Customer readiness:</strong> Each learner can deliver a two-minute positioning narrative connecting MCP to real customer integration pain.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--blue" style="margin-top: 0.12in;">
+      <div class="info-box-label" style="color: var(--color-primary);">Assessment approach</div>
+      <p>No formal test. Facilitator observes during pair exercises and the group discussion. Quick pulse check: "On a scale of 1-5, how confident are you demoing MCP to a customer tomorrow?" Target: 4+ average.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9: TECHNICAL REASONING
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Part 2 &mdash; Reasoning</div>
+    <div class="page-title">Technical choices and trade-offs</div>
+    <p class="page-subtitle">How I approached the design of this lab, and why.</p>
+
+    <h3>Technical choices</h3>
+    <ul class="bullet-list">
+      <li><strong>AWS Lambda + Function URLs:</strong> Lean serverless footprint with zero gateway overhead. Function URLs provide a dedicated HTTPS endpoint without API Gateway configuration. CloudShell eliminates local CLI setup entirely&mdash;SEs open a browser tab and start building.</li>
+      <li><strong>Mock "search" over "model":</strong> Enterprise search mirrors the most common customer integration pattern: retrieve authoritative context, then generate grounded answers. This is how Glean positions workplace search and agentic workflows&mdash;the lab teaches the exact narrative SEs need.</li>
+      <li><strong>One narrow MCP tool (<code>kb_search</code>):</strong> One tool is enough to teach discovery, schema, invocation, and return payload interpretation. It keeps the lab focused while enabling natural discussion of multi-tool scenarios and tool filtering for follow-up sessions.</li>
+      <li><strong>Official MCP Python SDK (FastMCP):</strong> FastMCP provides a clean decorator-based API that matches how MCP tutorials introduce the protocol. It supports both stdio and Streamable HTTP, so the same code can be upgraded for production-shaped demos later.</li>
+      <li><strong>stdio transport for the lab:</strong> Eliminates OAuth flows, Origin validation, and HTTP server setup. Streamable HTTP is the production transport for remote servers, but it adds 20+ minutes of cognitive load that would crowd out the core concepts in a 60-90 minute session.</li>
+      <li><strong>MCP Inspector for debugging:</strong> Provides interactive protocol-level testing (discovery, tool calls, schema inspection) without hiding details behind a chat UI. This is the tool SEs will actually use when troubleshooting customer POVs.</li>
+    </ul>
+
+    <h3 style="margin-top: 0.12in;">Key trade-offs: realism vs time-box</h3>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Lab simplification</th><th>Production reality</th><th>Why acceptable</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>stdio transport</td>
+          <td>Streamable HTTP with auth</td>
+          <td>Teaches core MCP concepts without OAuth overhead</td>
+        </tr>
+        <tr>
+          <td>Deterministic mock data</td>
+          <td>Live search index</td>
+          <td>Makes validation reproducible, debugging faster</td>
+        </tr>
+        <tr>
+          <td>Function URL auth: NONE</td>
+          <td>IAM or OAuth-protected endpoint</td>
+          <td>Removes auth complexity from the critical path</td>
+        </tr>
+        <tr>
+          <td>Security as teachable overlay</td>
+          <td>Full implementation required</td>
+          <td>SEs learn the vocabulary and requirements without the setup time</td>
+        </tr>
+        <tr>
+          <td>Single tool</td>
+          <td>Multi-tool, filtered discovery</td>
+          <td>One tool teaches the full pattern; more tools are additive, not conceptually new</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box info-box--blue" style="margin-top: 0.08in;">
+      <div class="info-box-label" style="color: var(--color-primary);">Simplification philosophy</div>
+      <p>Keep the concept set to "tool discovery + one tool call." This matches how official MCP tutorials introduce the protocol, and it's enough for SEs to build a credible mental model. Everything else (multi-tool, resources, prompts, OAuth) is additive, not conceptually new.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 10: BUSINESS IMPACT + ENABLEMENT FIT
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Part 2 &mdash; Reasoning (continued)</div>
+    <div class="page-title">Business impact and enablement fit</div>
+
+    <h3>Business and GTM relevance</h3>
+    <ul class="bullet-list">
+      <li><strong>The customer story this lab enables:</strong> "Your agents need controlled access to real enterprise systems. MCP provides a standardized connector surface&mdash;like a universal port for agent integrations&mdash;reducing bespoke integration work across every system your agents need to reach."</li>
+      <li><strong>Enterprise search as the grounding layer:</strong> RAG is the core pattern for reducing hallucinations in knowledge-intensive tasks. A search integration is the strongest default demo because it shows real retrieval, real grounding, and real citations&mdash;not just "AI magic."</li>
+      <li><strong>Governance and consent positioning:</strong> MCP emphasizes authorization for user-specific data and enterprise environments. SEs can speak credibly about permissions, auditing, and least privilege&mdash;the exact questions enterprise security teams will ask.</li>
+      <li><strong>Discovery conversations:</strong> After this lab, SEs can map a customer's "systems of record" (search, ticketing, CRM, knowledge base) to MCP server tool surfaces. Reference implementations exist across many categories, making the ecosystem immediately credible.</li>
+      <li><strong>Demo-to-POV bridge:</strong> The lab teaches SEs to define "meaningful results" criteria using repeatable test queries and validation dimensions (relevance, grounding, permissions). This is the bridge from "impressive demo" to "measurable customer value."</li>
+    </ul>
+
+    <hr class="divider">
+
+    <h3>Enablement fit</h3>
+    <ul class="bullet-list">
+      <li><strong>Position in SE enablement path:</strong> This is a <strong>mid-tier, intermediate</strong> lab. Prerequisites include basic cloud and API literacy (covered in onboarding), but it introduces a new protocol and integration pattern. It sits after "Platform Overview" and "Core Demo Skills" in the curriculum, before advanced topics like multi-agent orchestration or custom connector development.</li>
+      <li><strong>Reusability:</strong> The lab structure (mock API + MCP server + validation) is a reusable template. Swap the mock search for a mock ticketing system, CRM, or document store to create a library of integration labs from the same foundation.</li>
+      <li><strong>Iteration ideas for v2 and beyond:</strong></li>
+    </ul>
+
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div>
+        <div class="info-box info-box--cyan">
+          <div class="info-box-label" style="color: #0E7490;">v2: Streamable HTTP + Auth</div>
+          <p>Upgrade from stdio to Streamable HTTP with OAuth. Teaches the production transport and security model. Adds 30 minutes; makes it a half-day session.</p>
+        </div>
+      </div>
+      <div>
+        <div class="info-box info-box--green">
+          <div class="info-box-label" style="color: var(--color-emerald);">v3: Multi-tool + Observability</div>
+          <p>Add a second tool (e.g., ticketing), introduce tool filtering, and add OpenTelemetry tracing for production-grade observability.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div>
+        <div class="info-box info-box--amber">
+          <div class="info-box-label" style="color: #B45309;">Stretch: Customer-facing workshop</div>
+          <p>Adapt the lab into a 2-hour customer workshop where technical champions build their own MCP server for their enterprise search system. SEs co-facilitate.</p>
+        </div>
+      </div>
+      <div>
+        <div class="info-box info-box--blue">
+          <div class="info-box-label" style="color: var(--color-primary);">Stretch: Evaluation framework</div>
+          <p>Build a lightweight scoring harness that compares agent answers against a golden-answer set. Introduces evaluation rigor for POV-stage conversations.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 11: CHEAT SHEET - CONCEPTS + ARCHITECTURE
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Part 3 &mdash; Quick Reference</div>
+    <div class="page-title">Cheat sheet: concepts and architecture</div>
+    <p class="page-subtitle">Keep this open during the lab or reference later.</p>
+
+    <h3>Key MCP concepts</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>Concept</th><th>What it means</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>MCP Server</strong></td><td>Exposes tools, resources, and prompts to clients via a standardized schema</td></tr>
+        <tr><td><strong>MCP Client</strong></td><td>Discovers server capabilities and calls tools with structured arguments</td></tr>
+        <tr><td><strong>Tools</strong></td><td>Callable functions for side-effecting actions or API calls (our lab focus)</td></tr>
+        <tr><td><strong>Resources</strong></td><td>Read-only data artifacts, analogous to "file-like" context</td></tr>
+        <tr><td><strong>Prompts</strong></td><td>Reusable prompt templates exposed by a server to the client</td></tr>
+        <tr><td><strong>JSON-RPC</strong></td><td>Message encoding format: request/response semantics over the transport</td></tr>
+        <tr><td><strong>stdio transport</strong></td><td>Client launches server as a subprocess. Simplest option for local work</td></tr>
+        <tr><td><strong>Streamable HTTP</strong></td><td>Server runs independently, supports multiple clients. Production transport</td></tr>
+        <tr><td><strong>MCP Inspector</strong></td><td>Interactive debugging tool for protocol-level testing of discovery + tool calls</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 0.1in;">Architecture at a glance</h3>
+    <div class="code-block" style="font-size: 9pt; line-height: 1.7; background: #1E293B;">
+<span class="string">User prompt</span>
+    <span class="comment">|</span>
+    v
+<span class="key">[  Agent / LLM  ]</span>  &lt;-- Decides to use kb_search tool
+    <span class="comment">|</span>
+    v  <span class="comment">(JSON-RPC over stdio)</span>
+<span class="key">[  MCP Client   ]</span>  &lt;-- Discovers tools, sends structured call
+    <span class="comment">|</span>
+    v
+<span class="fn">[  MCP Server   ]</span>  &lt;-- kb_search(query, top_k) tool definition
+    <span class="comment">|</span>
+    v  <span class="comment">(HTTPS GET)</span>
+<span class="string">[ Mock Search API ]</span>  &lt;-- Lambda Function URL, returns ranked JSON
+    <span class="comment">|</span>
+    v
+<span class="value">{ results: [...] }</span>  &lt;-- Flows back through MCP to the agent
+    <span class="comment">|</span>
+    v
+<span class="string">Grounded answer with citations</span></div>
+
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 12: CHEAT SHEET - COMMANDS + TROUBLESHOOTING
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Part 3 &mdash; Quick Reference (continued)</div>
+    <div class="page-title">Cheat sheet: commands and troubleshooting</div>
+
+    <h3>Critical rules</h3>
+    <div class="two-col" style="margin-bottom: 0.1in;">
+      <div class="info-box info-box--rose">
+        <div class="info-box-label" style="color: var(--color-rose);">stdout is sacred (stdio)</div>
+        <p>Never write anything to stdout except JSON-RPC frames. All logging goes to <code>stderr</code>. Use: <code>print(..., file=sys.stderr)</code></p>
+      </div>
+      <div class="info-box info-box--amber">
+        <div class="info-box-label" style="color: #B45309;">SSE is deprecated</div>
+        <p>Server-Sent Events as a standalone MCP transport is deprecated. Use <strong>stdio</strong> (local) or <strong>Streamable HTTP</strong> (remote) for all new work.</p>
+      </div>
+    </div>
+
+    <h3>Core commands</h3>
+    <div class="code-block"><span class="comment"># Test the mock API directly</span>
+curl <span class="string">"https://&lt;function-url&gt;/search?q=renewal+process&top_k=3"</span>
+
+<span class="comment"># Run MCP Inspector against your server</span>
+npx @anthropic-ai/mcp-inspector python server.py
+
+<span class="comment"># Run the MCP server locally (stdio)</span>
+python server.py
+
+<span class="comment"># Check Lambda logs</span>
+aws logs tail /aws/lambda/mock-search --follow</div>
+
+    <h3 style="margin-top: 0.12in;">Troubleshooting quick reference</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>Symptom</th><th>Likely cause</th><th>Check this</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>No tools show up in Inspector</td><td>Server not running or not discoverable</td><td>Confirm server process is alive; check stderr for startup errors</td></tr>
+        <tr><td>Server "breaks randomly"</td><td>stdout corruption from print()</td><td>Search for <code>print(</code> without <code>file=sys.stderr</code></td></tr>
+        <tr><td>Tool call returns empty/error</td><td>Wrong endpoint URL</td><td>Check ENDPOINT variable; try curl directly</td></tr>
+        <tr><td>Mock API returns 403 or 500</td><td>Lambda misconfiguration</td><td>CloudWatch log group for the Lambda function</td></tr>
+        <tr><td>Agent ignores search results</td><td>Response format mismatch</td><td>Confirm tool returns valid JSON string; check Inspector output tab</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 13: CHEAT SHEET - CUSTOMER PHRASES
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Part 3 &mdash; Quick Reference (continued)</div>
+    <div class="page-title">Cheat sheet: customer-facing talk tracks</div>
+    <p class="page-subtitle">Reusable phrases SEs can adapt for demos and POV conversations.</p>
+
+    <div class="phrase-card">
+      "MCP is a standard interface for tool discovery and structured tool calls&mdash;like a universal port for agent integrations. Instead of building a custom connector for every system, you declare your tools once and any MCP-compatible agent can discover and use them."
+    </div>
+
+    <div class="phrase-card">
+      "We keep enterprise permissions intact. The agent only sees what the user is allowed to see. Every tool call goes through a defined trust boundary with structured schemas&mdash;not open-ended access to your systems."
+    </div>
+
+    <div class="phrase-card">
+      "We ground responses in retrieved sources, then generate. That means every answer comes with citations you can verify. It's the difference between 'the AI said so' and 'here's the source document.'"
+    </div>
+
+    <div class="phrase-card">
+      "The protocol handles the plumbing&mdash;tool discovery, schema validation, transport security. Your team focuses on which enterprise systems to connect and what governance policies to apply."
+    </div>
+
+    <div class="phrase-card">
+      "This isn't a black box. MCP Inspector gives you protocol-level visibility into every tool call, every schema, every response. You can debug an integration in minutes, not days."
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 13: STRETCH / FUTURE ITERATIONS
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Future iterations</div>
+    <div class="page-title">Stretch ideas and evolution roadmap</div>
+    <p class="page-subtitle">How this lab grows from a single session into a sustainable enablement program.</p>
+
+    <h3>Iteration roadmap</h3>
+
+    <div class="flow-step" style="margin-top: 0.1in;">
+      <div class="flow-marker">
+        <div class="flow-dot" style="background: var(--color-emerald);">&#10003;</div>
+        <div class="flow-line"></div>
+      </div>
+      <div class="flow-body">
+        <div class="flow-title">v1: Current lab <span class="tag tag--green">Today</span></div>
+        <div class="flow-desc">Single tool, stdio transport, mock search API, MCP Inspector debugging. Teaches the core mental model and gives SEs demo confidence in 60-90 minutes.</div>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-marker">
+        <div class="flow-dot" style="background: var(--color-cyan);">2</div>
+        <div class="flow-line"></div>
+      </div>
+      <div class="flow-body">
+        <div class="flow-title">v2: Production transport + auth <span class="tag tag--cyan">Next quarter</span></div>
+        <div class="flow-desc">Upgrade to Streamable HTTP transport with OAuth 2.1 authorization. Adds Origin header validation. Half-day session. SEs can now speak credibly to security teams.</div>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-marker">
+        <div class="flow-dot" style="background: var(--color-primary);">3</div>
+        <div class="flow-line"></div>
+      </div>
+      <div class="flow-body">
+        <div class="flow-title">v3: Multi-tool + observability <span class="tag tag--purple">Future</span></div>
+        <div class="flow-desc">Add a second enterprise tool (ticketing or CRM), introduce tool filtering and routing, add OpenTelemetry tracing. SEs can demo complex multi-system agent workflows.</div>
+      </div>
+    </div>
+
+    <div class="flow-step">
+      <div class="flow-marker">
+        <div class="flow-dot" style="background: var(--color-amber);">4</div>
+      </div>
+      <div class="flow-body">
+        <div class="flow-title">v4: Customer-facing workshop <span class="tag tag--amber">Stretch</span></div>
+        <div class="flow-desc">Adapt into a 2-hour workshop where customer technical champions build their own MCP server connected to their enterprise search. SEs co-facilitate. Deepens post-sales relationships.</div>
+      </div>
+    </div>
+
+    <hr class="divider" style="margin-top: 0.15in;">
+
+    <h3>Additional stretch ideas</h3>
+    <div class="two-col">
+      <div>
+        <h4>Evaluation framework</h4>
+        <p class="small">Build a lightweight scoring harness that compares agent answers against a golden-answer set. Uses basic IR metrics (precision@k). Bridges "impressive demo" to "measurable value" for POV-stage conversations.</p>
+
+        <h4 style="margin-top: 0.08in;">Prompt injection red-teaming</h4>
+        <p class="small">Add a module where SEs attempt prompt injection against the MCP tool boundary. Demonstrates why tool scoping, input validation, and human-in-the-loop controls matter. Great for security-conscious enterprise customers.</p>
+      </div>
+      <div>
+        <h4>Self-service lab kit</h4>
+        <p class="small">Package the lab as a self-paced GitHub repo with a Terraform/CDK template for the AWS infrastructure. New SEs can run through it independently during onboarding. Reduces facilitator dependency.</p>
+
+        <h4 style="margin-top: 0.08in;">Competitive positioning module</h4>
+        <p class="small">Add a 15-minute segment comparing MCP-based integration to proprietary alternatives (custom SDKs, GraphQL gateways, vendor-locked connectors). Gives SEs ammunition for competitive deals.</p>
+      </div>
+    </div>
+
+    <div class="info-box info-box--green" style="margin-top: 0.1in;">
+      <div class="info-box-label" style="color: var(--color-emerald);">Reusable template</div>
+      <p>The lab structure&mdash;mock API + MCP server + validation + troubleshooting + positioning&mdash;is a reusable template. Swap the mock search for any enterprise system (ticketing, CRM, document store, HRIS) to create a library of integration labs from the same foundation. One architecture, many customer stories.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 14: BACK COVER
+     ============================================================ -->
+<div class="page" style="page: back;">
+  <div class="page-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+
+    <div class="section-label" style="font-size: 10pt; margin-bottom: 0.15in;">Summary</div>
+
+    <div style="max-width: 5.5in; text-align: center;">
+      <p style="font-size: 14pt; font-weight: 700; color: var(--color-slate-900); margin-bottom: 0.1in;">One protocol. Many enterprise systems. Grounded answers.</p>
+      <p class="text-muted" style="margin-bottom: 0.2in;">This lab gives SEs the hands-on confidence to demo, position, and troubleshoot MCP integrations with real customer impact.</p>
+    </div>
+
+    <div style="width: 2.5in; height: 2px; background: linear-gradient(to right, transparent, var(--color-primary), var(--color-cyan), transparent); margin: 0.2in 0;"></div>
+
+    <ul class="check-list" style="max-width: 4.5in; margin: 0.15in 0;">
+      <li>60-90 minutes, hands-on, instructor-led</li>
+      <li>AWS Lambda + MCP Python SDK + MCP Inspector</li>
+      <li>Mock enterprise search with relevance, grounding, and permissions validation</li>
+      <li>Troubleshooting framework: client, server, endpoint triage</li>
+      <li>Customer-ready talk tracks and positioning narratives</li>
+      <li>Reusable template for a library of integration labs</li>
+    </ul>
+
+    <div style="width: 2.5in; height: 2px; background: linear-gradient(to right, transparent, var(--color-primary), var(--color-cyan), transparent); margin: 0.2in 0;"></div>
+
+    <p style="font-size: 9pt; color: var(--color-slate-500); text-align: center; margin-top: 0.15in;">
+      Prepared by John Yzaguirre<br>
+      Technical Enablement Manager Assignment
+    </p>
+  </div>
+</div>
+
+</body>
+</html>

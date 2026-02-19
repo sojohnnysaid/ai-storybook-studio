@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MCP Integration Lab - Panel Delivery & Presenter Notes</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root {
+  --color-primary:      #4F46E5;
+  --color-primary-light: #EEF2FF;
+  --color-primary-dark:  #3730A3;
+  --color-cyan:          #06B6D4;
+  --color-cyan-light:    #ECFEFF;
+  --color-emerald:       #10B981;
+  --color-emerald-light: #ECFDF5;
+  --color-amber:         #F59E0B;
+  --color-amber-light:   #FFFBEB;
+  --color-rose:          #F43F5E;
+  --color-rose-light:    #FFF1F2;
+  --color-slate-900:     #0F172A;
+  --color-slate-700:     #334155;
+  --color-slate-500:     #64748B;
+  --color-slate-300:     #CBD5E1;
+  --color-slate-200:     #E2E8F0;
+  --color-slate-100:     #F1F5F9;
+  --color-slate-50:      #F8FAFC;
+  --color-white:         #FFFFFF;
+
+  --font-sans:  'Inter', -apple-system, sans-serif;
+  --font-code:  'Fira Code', monospace;
+}
+
+/* ============================================================
+   PAGED MEDIA
+   ============================================================ */
+@page {
+  size: 8.5in 11in;
+  margin: 0;
+}
+@page :left {
+  @bottom-left {
+    content: "Presenter Notes  |  Page " counter(page);
+    font-family: var(--font-sans);
+    font-size: 7.5pt;
+    color: var(--color-slate-500);
+    margin-left: 0.75in;
+    margin-bottom: 0.35in;
+  }
+}
+@page :right {
+  @bottom-right {
+    content: "Page " counter(page) "  |  Presenter Notes";
+    font-family: var(--font-sans);
+    font-size: 7.5pt;
+    color: var(--color-slate-500);
+    margin-right: 0.75in;
+    margin-bottom: 0.35in;
+  }
+}
+@page cover { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+@page back { margin: 0; @bottom-left { content: none; } @bottom-right { content: none; } }
+
+/* ============================================================
+   BASE
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { font-size: 11pt; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-slate-700);
+  line-height: 1.55;
+}
+
+.page {
+  width: 8.5in;
+  height: 11in;
+  position: relative;
+  overflow: hidden;
+  page-break-after: always;
+  page-break-inside: avoid;
+  background: var(--color-white);
+}
+.page:last-child { page-break-after: auto; }
+
+.page-content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0.6in 0.7in;
+  z-index: 1;
+}
+
+/* ============================================================
+   COVER
+   ============================================================ */
+.page--cover {
+  page: cover;
+  background: linear-gradient(135deg, var(--color-slate-900) 0%, #1E1B4B 50%, var(--color-primary-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cover-inner {
+  text-align: center;
+  padding: 0.75in 1in;
+  width: 100%;
+}
+.cover-badge {
+  display: inline-block;
+  background: rgba(6,182,212,0.25);
+  border: 1px solid rgba(6,182,212,0.5);
+  border-radius: 100px;
+  padding: 0.06in 0.25in;
+  font-size: 9pt;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.4in;
+}
+.cover-title {
+  font-size: 32pt;
+  font-weight: 800;
+  color: var(--color-white);
+  line-height: 1.15;
+  margin-bottom: 0.15in;
+}
+.cover-title span {
+  background: linear-gradient(135deg, #818CF8, #06B6D4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.cover-subtitle {
+  font-size: 14pt;
+  font-weight: 400;
+  color: rgba(255,255,255,0.75);
+  margin-bottom: 0.5in;
+  line-height: 1.5;
+}
+.cover-rule {
+  width: 2in;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--color-cyan), transparent);
+  margin: 0.3in auto;
+}
+.cover-meta {
+  font-size: 10pt;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+}
+.cover-meta strong {
+  color: rgba(255,255,255,0.8);
+}
+
+/* ============================================================
+   TYPOGRAPHY
+   ============================================================ */
+.section-label {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.06in;
+}
+.page-title {
+  font-size: 20pt;
+  font-weight: 800;
+  color: var(--color-slate-900);
+  line-height: 1.2;
+  margin-bottom: 0.12in;
+}
+.page-subtitle {
+  font-size: 11pt;
+  color: var(--color-slate-500);
+  margin-bottom: 0.15in;
+  line-height: 1.5;
+}
+h3 {
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin: 0.12in 0 0.06in;
+}
+h4 {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--color-slate-700);
+  margin: 0.08in 0 0.04in;
+}
+p {
+  font-size: 10.5pt;
+  line-height: 1.55;
+  margin-bottom: 0.06in;
+}
+.small {
+  font-size: 9.5pt;
+}
+.text-muted {
+  color: var(--color-slate-500);
+}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
+
+/* Info boxes */
+.info-box {
+  border-radius: 0.06in;
+  padding: 0.1in 0.12in;
+  margin: 0.08in 0;
+}
+.info-box--blue {
+  background: var(--color-primary-light);
+  border-left: 3px solid var(--color-primary);
+}
+.info-box--cyan {
+  background: var(--color-cyan-light);
+  border-left: 3px solid var(--color-cyan);
+}
+.info-box--green {
+  background: var(--color-emerald-light);
+  border-left: 3px solid var(--color-emerald);
+}
+.info-box--amber {
+  background: var(--color-amber-light);
+  border-left: 3px solid var(--color-amber);
+}
+.info-box--rose {
+  background: var(--color-rose-light);
+  border-left: 3px solid var(--color-rose);
+}
+.info-box-label {
+  font-size: 9pt;
+  font-weight: 700;
+  margin-bottom: 0.02in;
+}
+.info-box p {
+  font-size: 9.5pt;
+  margin: 0;
+  line-height: 1.45;
+}
+
+/* Phrase cards */
+.phrase-card {
+  background: var(--color-slate-900);
+  color: var(--color-white);
+  border-radius: 0.06in;
+  padding: 0.08in 0.12in;
+  margin: 0.05in 0;
+  font-size: 9.5pt;
+  font-style: italic;
+  line-height: 1.45;
+  border-left: 3px solid var(--color-cyan);
+}
+
+/* Tables */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.06in 0;
+  font-size: 9.5pt;
+}
+.data-table th {
+  background: var(--color-slate-100);
+  font-weight: 700;
+  text-align: left;
+  padding: 0.05in 0.08in;
+  border-bottom: 2px solid var(--color-slate-300);
+  font-size: 9pt;
+  color: var(--color-slate-700);
+}
+.data-table td {
+  padding: 0.04in 0.08in;
+  border-bottom: 1px solid var(--color-slate-100);
+  vertical-align: top;
+}
+
+/* Bullet lists */
+.bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.04in 0;
+}
+.bullet-list li {
+  font-size: 10pt;
+  line-height: 1.45;
+  padding: 0.02in 0 0.02in 0.2in;
+  position: relative;
+}
+.bullet-list li::before {
+  content: '';
+  position: absolute;
+  left: 0.04in;
+  top: 0.1in;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-primary);
+}
+.bullet-list--cyan li::before { background: var(--color-cyan); }
+.bullet-list--green li::before { background: var(--color-emerald); }
+.bullet-list--amber li::before { background: var(--color-amber); }
+
+/* Checklist */
+.check-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.04in 0;
+}
+.check-list li {
+  font-size: 9.5pt;
+  line-height: 1.4;
+  padding: 0.02in 0 0.02in 0.22in;
+  position: relative;
+}
+.check-list li::before {
+  content: '\2713';
+  position: absolute;
+  left: 0;
+  color: var(--color-emerald);
+  font-weight: 700;
+  font-size: 10pt;
+}
+
+/* Section divider */
+.divider {
+  border: none;
+  height: 1px;
+  background: var(--color-slate-200);
+  margin: 0.12in 0;
+}
+
+/* Two-column layout */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.15in;
+}
+
+/* Tags */
+.tag {
+  display: inline-block;
+  font-size: 7.5pt;
+  font-weight: 700;
+  padding: 0.01in 0.08in;
+  border-radius: 100px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.tag--purple { background: var(--color-primary-light); color: var(--color-primary); }
+.tag--cyan { background: var(--color-cyan-light); color: #0E7490; }
+.tag--green { background: var(--color-emerald-light); color: #047857; }
+.tag--amber { background: var(--color-amber-light); color: #B45309; }
+.tag--rose { background: var(--color-rose-light); color: var(--color-rose); }
+
+/* Timeline blocks */
+.timeline-block {
+  display: flex;
+  gap: 0.12in;
+  margin-bottom: 0.06in;
+  align-items: flex-start;
+}
+.timeline-time {
+  min-width: 0.8in;
+  font-size: 9pt;
+  font-weight: 700;
+  font-family: var(--font-code);
+  color: var(--color-cyan);
+  padding-top: 0.02in;
+  flex-shrink: 0;
+}
+.timeline-body {
+  flex: 1;
+  border-left: 2px solid var(--color-slate-200);
+  padding-left: 0.1in;
+  padding-bottom: 0.04in;
+}
+.timeline-title {
+  font-size: 10.5pt;
+  font-weight: 700;
+  color: var(--color-slate-900);
+  margin-bottom: 0.02in;
+}
+.timeline-notes {
+  font-size: 9pt;
+  color: var(--color-slate-500);
+  line-height: 1.45;
+}
+
+/* Panic card */
+.panic-card {
+  background: var(--color-rose-light);
+  border: 1px solid var(--color-rose);
+  border-radius: 0.06in;
+  padding: 0.08in 0.1in;
+  margin: 0.04in 0;
+}
+.panic-card-trigger {
+  font-size: 9pt;
+  font-weight: 700;
+  color: var(--color-rose);
+  margin-bottom: 0.02in;
+}
+.panic-card-response {
+  font-size: 9pt;
+  color: var(--color-slate-700);
+  line-height: 1.4;
+}
+
+/* Standout card */
+.standout-card {
+  background: var(--color-slate-50);
+  border-radius: 0.06in;
+  padding: 0.1in 0.12in;
+  margin: 0.06in 0;
+  border-left: 3px solid var(--color-primary);
+}
+.standout-label {
+  font-size: 8.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.03in;
+}
+
+code {
+  font-family: var(--font-code);
+  font-size: 9pt;
+  background: var(--color-slate-100);
+  padding: 0.01in 0.04in;
+  border-radius: 0.02in;
+  color: var(--color-primary-dark);
+}
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     PAGE 1: COVER
+     ============================================================ -->
+<div class="page page--cover">
+  <div class="cover-inner">
+    <div class="cover-badge">Facilitator's Guide</div>
+
+    <h1 class="cover-title">MCP Integration Lab<br><span>Panel Delivery &amp; Presenter Notes</span></h1>
+    <p class="cover-subtitle">45-minute panel session prep for Technical Enablement Manager interview</p>
+
+    <div class="cover-rule"></div>
+
+    <p class="cover-meta">
+      <strong>Prepared by</strong> John Yzaguirre<br>
+      <strong>Format</strong> 45-minute panel presentation + Q&amp;A<br>
+      <strong>Companion to</strong> MCP Integration Lab Design Document
+    </p>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 2: SESSION STRUCTURE
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Session overview</div>
+    <div class="page-title">Panel session structure</div>
+    <p class="page-subtitle">How to deliver the MCP Integration Lab design in a 45-minute evaluative panel.</p>
+
+    <h3>Three-part format</h3>
+    <p class="small text-muted">The session is designed to demonstrate three competencies: technical communication, enablement design thinking, and improvisation under pressure.</p>
+
+    <div class="two-col" style="margin-top: 0.1in;">
+      <div>
+        <div class="info-box info-box--blue">
+          <div class="info-box-label" style="color: var(--color-primary);">Part 1: Presentation (8 min)</div>
+          <p>Structured walk-through of the lab design. Lead with the customer story, not the technology. Show you can distill a complex technical topic into a clear enablement narrative.</p>
+        </div>
+        <div class="info-box info-box--cyan">
+          <div class="info-box-label" style="color: #0E7490;">Part 2: Deep walk-through (20 min)</div>
+          <p>Section-by-section lab walk-through with the panel. Demonstrate depth of knowledge, design rationale, and ability to adapt to questions mid-flow. This is where you prove you can teach.</p>
+        </div>
+        <div class="info-box info-box--green">
+          <div class="info-box-label" style="color: var(--color-emerald);">Part 3: Q&amp;A + Discussion (17 min)</div>
+          <p>Open floor for panel questions. Show you can think on your feet, handle tough questions honestly, and bridge back to the core narrative. Finish with a strong close.</p>
+        </div>
+      </div>
+      <div>
+        <h3 style="margin-top: 0;">Evaluator signals to hit</h3>
+        <p class="small text-muted" style="margin-bottom: 0.06in;">What the panel is likely assessing:</p>
+        <ul class="bullet-list">
+          <li><strong>Technical credibility:</strong> You understand MCP, RAG, and enterprise integration patterns at depth</li>
+          <li><strong>Enablement instinct:</strong> You design for the learner, not the technology. Labs teach skills, not just concepts</li>
+          <li><strong>Customer empathy:</strong> You connect technical decisions to customer outcomes and SE conversations</li>
+          <li><strong>Practical judgment:</strong> You make smart trade-offs (realism vs. time-box) and can explain why</li>
+          <li><strong>Communication clarity:</strong> You can explain complex topics simply without dumbing them down</li>
+          <li><strong>Poise under pressure:</strong> You handle unexpected questions, admit what you don't know, and redirect constructively</li>
+        </ul>
+
+        <div class="info-box info-box--amber" style="margin-top: 0.08in;">
+          <div class="info-box-label" style="color: #B45309;">Success metric</div>
+          <p>If the panel walks away thinking "I'd trust this person to run our technical enablement program," you've succeeded. Every talking point should reinforce that trust.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 3: SESSION STRUCTURE (continued)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Session overview (continued)</div>
+    <div class="page-title">What great looks like</div>
+    <p class="page-subtitle">Criteria for a top-performing delivery, mapped to likely evaluation dimensions.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>Dimension</th><th>Good</th><th>Great</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Opening</strong></td>
+          <td>States what the lab is and what it covers</td>
+          <td>Starts with a customer pain point that makes the lab feel inevitable and urgent</td>
+        </tr>
+        <tr>
+          <td><strong>Technical depth</strong></td>
+          <td>Explains MCP architecture correctly</td>
+          <td>Shows trade-off reasoning, anticipates production questions, connects to competitive landscape</td>
+        </tr>
+        <tr>
+          <td><strong>Enablement design</strong></td>
+          <td>Describes lab activities clearly</td>
+          <td>Explains why each activity exists, what skill it builds, and how you'd measure success</td>
+        </tr>
+        <tr>
+          <td><strong>Customer lens</strong></td>
+          <td>Mentions customer relevance</td>
+          <td>Every design decision ties back to an SE customer conversation or demo moment</td>
+        </tr>
+        <tr>
+          <td><strong>Q&amp;A handling</strong></td>
+          <td>Answers questions accurately</td>
+          <td>Reframes questions constructively, admits gaps honestly, bridges back to the lab's value</td>
+        </tr>
+        <tr>
+          <td><strong>Closing</strong></td>
+          <td>Summarizes the lab</td>
+          <td>Leaves the panel with a memorable statement about what this lab enables for the SE team</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style="margin-top: 0.15in;">Three themes to weave throughout</h3>
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div>
+        <div class="standout-card">
+          <div class="standout-label" style="color: var(--color-primary);">Theme 1: "Hands-on, not slides"</div>
+          <p class="small">SEs learn by doing. This lab puts them in the driver's seat building real infrastructure, not watching a demo. Every section ends with a "done looks like" checkpoint.</p>
+        </div>
+      </div>
+      <div>
+        <div class="standout-card">
+          <div class="standout-label" style="color: var(--color-cyan);">Theme 2: "Enterprise search, not toy demos"</div>
+          <p class="small">The lab teaches the exact integration pattern customers ask about: enterprise search with grounding, citations, and permissions. This is how Glean positions workplace AI.</p>
+        </div>
+      </div>
+    </div>
+    <div class="standout-card">
+      <div class="standout-label" style="color: var(--color-emerald);">Theme 3: "From lab to customer conversation"</div>
+      <p class="small">Every technical activity connects to a customer-facing talk track. SEs don't just learn how MCP works; they leave with the vocabulary and confidence to position it in their next meeting. The lab is a bridge from technical understanding to sales impact.</p>
+    </div>
+
+    <div class="info-box info-box--blue" style="margin-top: 0.1in;">
+      <div class="info-box-label" style="color: var(--color-primary);">Delivery mindset</div>
+      <p>You're not presenting a document. You're showing how you think about enablement. The panel wants to see your design process, your prioritization instincts, and your ability to make complex things clear. Let the lab speak for itself; your job is to illuminate the reasoning behind it.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 4: MINUTE-BY-MINUTE FLOW (Part 1)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Minute-by-minute</div>
+    <div class="page-title">Detailed session timing</div>
+    <p class="page-subtitle">Segment-by-segment delivery plan with talking points and visual cues.</p>
+
+    <h3 style="margin-top: 0.06in;">Part 1: Presentation (0:00 &ndash; 8:00)</h3>
+    <p class="small text-muted">Structured overview. You control the flow. Keep it crisp and narrative-driven.</p>
+
+    <div style="margin-top: 0.08in;">
+      <div class="timeline-block">
+        <div class="timeline-time">0:00-1:30</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Opening hook</div>
+          <div class="timeline-notes">
+            Start with the customer problem, not the lab title. <em>"Imagine your largest enterprise customer asks: 'How do we give our AI agents controlled access to our internal systems without building a custom integration for every one?' That's the question this lab teaches SEs to answer."</em>
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">1:30-3:30</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Lab overview and architecture</div>
+          <div class="timeline-notes">
+            Describe the four-box architecture (Agent &rarr; MCP Client &rarr; MCP Server &rarr; Enterprise API). Explain why enterprise search is the right use case. Reference the three-layer pattern SEs will build and learn to explain.
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">3:30-5:30</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Seven-section flow</div>
+          <div class="timeline-notes">
+            Quick pass through the lab sections. Don't go deep yet (that's Part 2). Hit the highlights: customer story setup, infrastructure, mock API, MCP wiring, validation, troubleshooting, positioning. Emphasize the <em>"done looks like"</em> checkpoints.
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">5:30-7:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Key design decisions</div>
+          <div class="timeline-notes">
+            Highlight 2-3 of the most interesting trade-offs: (1) Why stdio over Streamable HTTP, (2) Why mock data over live search, (3) Why one tool instead of many. Show you think about realism vs. time-box deliberately.
+          </div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">7:00-8:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Bridge to walk-through</div>
+          <div class="timeline-notes">
+            <em>"That's the overview. Let me take you through each section in detail so you can see how the design decisions play out in practice. I'm happy to go deeper on anything as we go."</em> This invites the panel to engage interactively.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box info-box--amber" style="margin-top: 0.08in;">
+      <div class="info-box-label" style="color: #B45309;">Timing trigger</div>
+      <p>If you're past 8:00 and still in Part 1, skip the bridge statement and transition directly: <em>"Let me jump into the section details."</em> Don't compress Part 2 to make up time; it's the most important segment.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 5: MINUTE-BY-MINUTE FLOW (Part 2 & 3)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Minute-by-minute (continued)</div>
+    <div class="page-title">Walk-through and Q&amp;A timing</div>
+
+    <h3 style="margin-top: 0.06in;">Part 2: Deep walk-through (8:00 &ndash; 28:00)</h3>
+    <p class="small text-muted">Section-by-section with the panel. Adapt pace based on their engagement and questions.</p>
+
+    <div style="margin-top: 0.08in;">
+      <div class="timeline-block">
+        <div class="timeline-time">8:00-11:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Sections 1-2: Customer story + environment setup</div>
+          <div class="timeline-notes">Emphasize why the customer narrative comes first. Explain how the sketch exercise builds the mental model. For setup, stress that CloudShell eliminates local toolchain issues. <strong>Key point:</strong> "The lab starts with the <em>why</em>, not the <em>how</em>."</div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">11:00-16:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Sections 3-4: Mock API + MCP server wiring</div>
+          <div class="timeline-notes">Walk through the <code>/search</code> contract and the <code>kb_search</code> tool code. Highlight metadata fields (title, snippet, score, acl_group) and explain why each exists. Discuss the stdout/stderr rule. <strong>Key point:</strong> "This is the section where SEs go from understanding MCP conceptually to having built something with it."</div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">16:00-21:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Sections 5-6: Validation + troubleshooting</div>
+          <div class="timeline-notes">Discuss the three validation dimensions (relevance, grounding, permissions). Walk through the troubleshooting table and the "client, server, endpoint" triage pattern. <strong>Key point:</strong> "Troubleshooting during a customer POV is where SE credibility is won or lost. This section builds that muscle."</div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">21:00-25:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Section 7 + success criteria + reasoning</div>
+          <div class="timeline-notes">Cover the positioning narrative exercise and the "production delta" conversation. Explain success criteria and the assessment approach. Touch on trade-offs table and enablement fit. <strong>Key point:</strong> "We measure success by whether SEs can demo MCP to a customer tomorrow, not by quiz scores."</div>
+        </div>
+      </div>
+
+      <div class="timeline-block">
+        <div class="timeline-time">25:00-28:00</div>
+        <div class="timeline-body">
+          <div class="timeline-title">Stretch ideas + evolution roadmap</div>
+          <div class="timeline-notes">Brief pass through v2/v3/v4 evolution and stretch ideas. Show the lab is a platform, not a one-off. <strong>Key point:</strong> "The lab structure is a reusable template. Swap the mock search for any enterprise system to create a library of integration labs."</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <h3>Part 3: Q&amp;A + Close (28:00 &ndash; 45:00)</h3>
+
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div>
+        <div class="timeline-block">
+          <div class="timeline-time">28:00-40:00</div>
+          <div class="timeline-body">
+            <div class="timeline-title">Open Q&amp;A</div>
+            <div class="timeline-notes">Let the panel drive. Keep answers concise (60-90 seconds max). Bridge back to the lab when possible. See the Anticipated Q&amp;A pages for prep.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="timeline-block">
+          <div class="timeline-time">40:00-45:00</div>
+          <div class="timeline-body">
+            <div class="timeline-title">Strong close</div>
+            <div class="timeline-notes">Prepared closing statement. <em>"One protocol, many enterprise systems, grounded answers. This lab gives SEs the hands-on confidence to demo, position, and troubleshoot MCP integrations with real customer impact."</em></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 6: KEY TALKING POINTS
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Talking points</div>
+    <div class="page-title">Key narratives to deploy</div>
+    <p class="page-subtitle">Scripted phrases for high-impact moments. Use when the moment calls for precision.</p>
+
+    <h3 style="margin-top: 0.08in;">Opening hook</h3>
+    <div class="phrase-card">
+      "Imagine your largest enterprise customer asks: 'We have fifty internal systems our AI agents need to reach. Do we build fifty custom integrations, or is there a better way?' That's the question this lab teaches SEs to answer with confidence."
+    </div>
+
+    <h3>Why enterprise search</h3>
+    <div class="phrase-card">
+      "I chose enterprise search as the use case because it's the most common integration conversation SEs have. Retrieve authoritative context first, generate grounded answers second. That's the RAG pattern, and it's the core of how Glean positions workplace AI to customers."
+    </div>
+
+    <h3>Design philosophy</h3>
+    <div class="phrase-card">
+      "The lab is designed around a simple principle: SEs learn by doing. Every section ends with a 'done looks like' checkpoint. It's not about watching a demo; it's about building something, breaking it, fixing it, and then explaining it to a customer."
+    </div>
+
+    <h3>Trade-off reasoning</h3>
+    <div class="phrase-card">
+      "Every simplification in the lab is deliberate. Stdio instead of Streamable HTTP saves twenty minutes of OAuth setup. Mock data instead of live search makes debugging reproducible. One tool instead of many keeps the concept set small. Each of these is explicitly called out so SEs know what the production delta looks like."
+    </div>
+
+    <h3>Production delta</h3>
+    <div class="phrase-card">
+      "The protocol is production-ready. For a customer's environment, we'd add OAuth-aligned authorization, Origin header validation for HTTP transports, and least-privilege tool scoping. The lab teaches SEs to have that conversation confidently."
+    </div>
+
+    <h3>Reusable template</h3>
+    <div class="phrase-card">
+      "The lab structure is a reusable template. Mock API, MCP server, validation, troubleshooting, positioning. Swap the mock search for a ticketing system, CRM, or document store and you have a library of integration labs from the same foundation. One architecture, many customer stories."
+    </div>
+
+    <h3>Strong close</h3>
+    <div class="phrase-card">
+      "One protocol. Many enterprise systems. Grounded answers. This lab gives SEs the hands-on confidence to demo, position, and troubleshoot MCP integrations with real customer impact. That's the outcome I'd measure, and that's what I'd build the enablement program around."
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 7: TALKING POINTS (continued)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Talking points (continued)</div>
+    <div class="page-title">Situational phrases</div>
+    <p class="page-subtitle">Context-specific phrases for navigating common panel moments.</p>
+
+    <h3 style="margin-top: 0.08in;">When asked "Why not use a real Glean endpoint?"</h3>
+    <div class="phrase-card">
+      "Great question. A mock endpoint gives us three things: reproducible results for validation, deterministic data for debugging exercises, and zero dependency on production systems during a training lab. In a follow-up session, SEs could connect to a sandbox Glean instance as a stretch activity."
+    </div>
+
+    <h3>When asked about scaling to a larger SE team</h3>
+    <div class="phrase-card">
+      "The lab is designed to scale in two directions. First, it works as an instructor-led session for cohorts of 8-15 SEs. Second, we can package it as a self-service GitHub repo with Terraform templates so new SEs run through it independently during onboarding. That's the v4 stretch goal."
+    </div>
+
+    <h3>When asked about measuring effectiveness</h3>
+    <div class="phrase-card">
+      "I'd measure three things. First, lab completion: can the SE run an end-to-end query and get a grounded answer? Second, demo confidence: a pulse check asking 'How ready are you to demo MCP tomorrow?' Target is 4+ out of 5. Third, deal impact: track whether SEs who complete the lab reference MCP in customer conversations at a higher rate."
+    </div>
+
+    <h3>When asked about competitive differentiation</h3>
+    <div class="phrase-card">
+      "MCP is an open standard with broad ecosystem adoption. The competitive advantage isn't the protocol itself; it's that our SEs can explain how enterprise search connects to agent workflows with a real integration pattern. That's the story competitors struggle to tell because they're either model-first or connector-first, not both."
+    </div>
+
+    <h3>When you don't know the answer</h3>
+    <div class="phrase-card">
+      "That's a great question, and I want to be honest that I don't have a fully formed answer on that specific point. Here's how I'd approach it: [describe your process]. I'd want to research that before committing to an approach. What I can tell you is [bridge to something you do know confidently]."
+    </div>
+
+    <h3>When redirecting to the lab's value</h3>
+    <div class="phrase-card">
+      "That's an important consideration. The way it connects back to the lab is [specific connection]. The core principle is that SEs need hands-on experience with the integration pattern, not just a conceptual overview, because that's what gives them credibility in customer conversations."
+    </div>
+
+    <div class="info-box info-box--green" style="margin-top: 0.08in;">
+      <div class="info-box-label" style="color: var(--color-emerald);">Delivery tip</div>
+      <p>These phrases are starting points, not scripts. Internalize the key ideas and deliver them naturally. The panel will notice if you're reading verbatim. Aim for the confidence of someone who has taught this material before.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 8: ANTICIPATED Q&A (Part 1)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Anticipated Q&amp;A</div>
+    <div class="page-title">Likely questions and strong answers</div>
+    <p class="page-subtitle">Structured prep for the Q&amp;A segment. Each answer bridges back to the lab's value.</p>
+
+    <table class="data-table" style="font-size: 9pt;">
+      <thead>
+        <tr><th style="width: 1in;">Category</th><th style="width: 2.1in;">Likely question</th><th>Strong answer</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag--purple">Design</span></td>
+          <td>Why 60-90 minutes and not a half-day?</td>
+          <td>Scope is one tool, one integration pattern. Longer sessions add fatigue without adding conceptual depth. v2 (Streamable HTTP + auth) naturally extends to half-day when we're ready.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--purple">Design</span></td>
+          <td>How do you handle different skill levels in the room?</td>
+          <td>The "done looks like" checkpoints create natural catch-up points. Advanced SEs can move to troubleshooting or stretch ideas while others finish core activities. Pair work mixes skill levels naturally.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--cyan">Technical</span></td>
+          <td>Why stdio instead of Streamable HTTP?</td>
+          <td>Stdio eliminates OAuth, Origin validation, and HTTP server setup. That's 20+ minutes of cognitive overhead that crowds out core concepts. We teach Streamable HTTP conceptually and implement it in v2.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--cyan">Technical</span></td>
+          <td>Is MCP actually production-ready?</td>
+          <td>The specification is stable and well-documented. The "production delta" is auth and transport hardening, which is standard for any protocol. The lab explicitly teaches SEs to have this conversation.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--green">Customer</span></td>
+          <td>What customer objections do SEs face about MCP?</td>
+          <td>"Is it secure?" (yes, with proper auth and scoping), "Is it vendor-locked?" (no, it's an open standard), "Does it work with our systems?" (MCP servers exist for many enterprise categories). The lab prepares SEs for all three.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--green">Customer</span></td>
+          <td>How does this help SEs close deals?</td>
+          <td>SEs who can demo a real integration pattern, explain grounding, and troubleshoot in real time build more credibility than those showing slides. Technical credibility accelerates deal velocity.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--amber">Security</span></td>
+          <td>Isn't auth: NONE on the Lambda a security risk?</td>
+          <td>It's a lab simplification, explicitly called out. The Lambda exists for 60 minutes in a personal account and is deleted after. Production requires IAM or OAuth. Teaching this distinction is part of the lab.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 9: ANTICIPATED Q&A (Part 2)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Anticipated Q&amp;A (continued)</div>
+    <div class="page-title">More likely questions</div>
+
+    <table class="data-table" style="font-size: 9pt;">
+      <thead>
+        <tr><th style="width: 1in;">Category</th><th style="width: 2.1in;">Likely question</th><th>Strong answer</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag--amber">Security</span></td>
+          <td>What about prompt injection through the MCP tool?</td>
+          <td>The mock data is deterministic, so injection risk is minimal in the lab. For production, we teach tool scoping, input validation, and human-in-the-loop controls. It's a stretch module idea for v2.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--rose">Scale</span></td>
+          <td>How do you roll this out globally?</td>
+          <td>Three phases: (1) pilot with one region's SEs, iterate based on feedback, (2) train-the-trainer for regional leads, (3) self-service kit for async completion. Each phase builds on the previous.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--rose">Scale</span></td>
+          <td>What if SEs get stuck during the lab?</td>
+          <td>The troubleshooting section explicitly teaches the debugging framework. Additionally, the cheat sheet provides quick-reference commands and common failure patterns. Pair work means no one is stuck alone.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--purple">Design</span></td>
+          <td>Why Python and not TypeScript?</td>
+          <td>The MCP Python SDK (FastMCP) has the cleanest decorator-based API and matches the most popular MCP tutorials. Python is also more readable for SEs with mixed programming backgrounds. The concepts transfer to any SDK.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--cyan">Technical</span></td>
+          <td>How does this relate to Glean's actual API?</td>
+          <td>The mock <code>/search</code> contract mirrors a simplified version of real enterprise search: query in, ranked results with metadata out. When SEs connect to a real Glean endpoint, the integration pattern is identical; only the URL and auth change.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--green">Customer</span></td>
+          <td>What if a customer already uses a competitor's connector framework?</td>
+          <td>MCP is an open standard, not a vendor lock-in play. The pitch is: "You can keep what works and add MCP for new agent integrations." Standards reduce switching cost for the customer, which is a strength, not a weakness.</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag--purple">Design</span></td>
+          <td>How do you keep the lab current as MCP evolves?</td>
+          <td>The lab is built on the stable core of MCP (tools, schemas, transports). Protocol evolution adds new capabilities (like Streamable HTTP replacing SSE) that we fold into version updates. The structure is durable; the details are versioned.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="info-box info-box--blue" style="margin-top: 0.1in;">
+      <div class="info-box-label" style="color: var(--color-primary);">Q&amp;A strategy</div>
+      <p>Keep answers to 60-90 seconds. If a question goes deep, offer to go deeper: <em>"I can dive further into that if it's useful, or I can address other questions first."</em> This shows respect for the panel's time and gives you control of pacing.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 10: WHAT MAKES THIS STAND OUT
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Differentiators</div>
+    <div class="page-title">What makes this lab stand out</div>
+    <p class="page-subtitle">Five design choices that differentiate this from a typical enablement exercise.</p>
+
+    <div class="standout-card" style="border-left-color: var(--color-primary);">
+      <div class="standout-label" style="color: var(--color-primary);">1. Enterprise search, not a toy demo</div>
+      <p class="small">Most MCP tutorials use trivial examples (weather APIs, file readers). This lab uses enterprise search with ranked results, metadata, and permissions because that's the integration pattern SEs actually encounter in customer conversations. The use case is the teaching tool.</p>
+    </div>
+
+    <div class="standout-card" style="border-left-color: var(--color-cyan);">
+      <div class="standout-label" style="color: #0E7490;">2. Hands-on building, not slide-watching</div>
+      <p class="small">SEs deploy infrastructure, write code, and validate results. Every section has a "done looks like" checkpoint so both the learner and facilitator know when the skill is acquired. The lab measures doing, not just understanding.</p>
+    </div>
+
+    <div class="standout-card" style="border-left-color: var(--color-emerald);">
+      <div class="standout-label" style="color: var(--color-emerald);">3. RAG grounding as a first-class concept</div>
+      <p class="small">The lab explicitly teaches the retrieve-then-generate pattern with three validation dimensions: relevance, grounding, and permissions. SEs leave understanding not just how MCP works, but why grounded answers are the enterprise value proposition.</p>
+    </div>
+
+    <div class="standout-card" style="border-left-color: var(--color-amber);">
+      <div class="standout-label" style="color: #B45309;">4. Troubleshooting as a skill, not an afterthought</div>
+      <p class="small">A dedicated section on fault isolation teaches the "client, server, endpoint" triage pattern. SEs deliberately break each layer and fix it. This builds the confidence needed for live demos and customer POVs, where things will inevitably go wrong.</p>
+    </div>
+
+    <div class="standout-card" style="border-left-color: var(--color-rose);">
+      <div class="standout-label" style="color: var(--color-rose);">5. Customer positioning built into the lab</div>
+      <p class="small">The final section converts technical experience into customer-ready talk tracks. SEs practice a two-minute positioning narrative and a one-minute architecture explanation with a partner. The lab doesn't end with "you understand MCP"; it ends with "you can sell MCP."</p>
+    </div>
+
+    <div class="info-box info-box--blue" style="margin-top: 0.1in;">
+      <div class="info-box-label" style="color: var(--color-primary);">When to use this page</div>
+      <p>If the panel asks "What's different about your approach?" or "Why should we use this instead of existing MCP tutorials?", these five points are your answer. Lead with whichever point feels most relevant to the question.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 11: WHAT MAKES THIS STAND OUT (continued)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Differentiators (continued)</div>
+    <div class="page-title">Why evaluators should notice</div>
+    <p class="page-subtitle">Connecting the lab design to what the role requires.</p>
+
+    <h3 style="margin-top: 0.06in;">Mapping lab design to role competencies</h3>
+    <table class="data-table" style="font-size: 9pt;">
+      <thead>
+        <tr><th>Role competency</th><th>How the lab demonstrates it</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Technical depth</strong></td>
+          <td>Lab covers MCP architecture, JSON-RPC transport, tool schemas, RAG grounding, and production considerations. Code samples are real and runnable.</td>
+        </tr>
+        <tr>
+          <td><strong>Enablement design</strong></td>
+          <td>Clear learning objectives, "done looks like" checkpoints, mixed-skill accommodations, and measurable success criteria. Lab follows adult learning principles.</td>
+        </tr>
+        <tr>
+          <td><strong>Customer orientation</strong></td>
+          <td>Every design decision maps to a customer conversation or SE demo moment. Talk tracks are built into the lab, not added as an afterthought.</td>
+        </tr>
+        <tr>
+          <td><strong>GTM awareness</strong></td>
+          <td>Enterprise search use case aligns with how the company positions workplace AI. Lab teaches the exact narrative SEs need for customer conversations.</td>
+        </tr>
+        <tr>
+          <td><strong>Scalability thinking</strong></td>
+          <td>Reusable template design, self-service packaging roadmap, and train-the-trainer model show how to scale beyond a single session.</td>
+        </tr>
+        <tr>
+          <td><strong>Practical judgment</strong></td>
+          <td>Deliberate simplifications (stdio, mock data, single tool) are explicitly documented with production alternatives. Shows mature trade-off reasoning.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="divider">
+
+    <h3>The "would I hire this person?" test</h3>
+    <p class="small">The panel is ultimately asking themselves one question. Here's how the lab answers it:</p>
+
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div>
+        <div class="info-box info-box--green">
+          <div class="info-box-label" style="color: var(--color-emerald);">Can they teach?</div>
+          <p>The lab breaks a complex protocol into seven progressive sections, each building on the previous. The "done looks like" pattern shows pedagogical rigor.</p>
+        </div>
+        <div class="info-box info-box--blue">
+          <div class="info-box-label" style="color: var(--color-primary);">Can they think technically?</div>
+          <p>The architecture diagram, code samples, and trade-off analysis show genuine technical understanding, not surface-level familiarity.</p>
+        </div>
+      </div>
+      <div>
+        <div class="info-box info-box--cyan">
+          <div class="info-box-label" style="color: #0E7490;">Can they connect to business outcomes?</div>
+          <p>Talk tracks, positioning narratives, and the "demo-to-POV bridge" concept show a direct line from lab activity to revenue impact.</p>
+        </div>
+        <div class="info-box info-box--amber">
+          <div class="info-box-label" style="color: #B45309;">Can they build a program?</div>
+          <p>The reusable template design, iteration roadmap, and scalability thinking show someone who builds systems, not just one-off sessions.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 12: FACILITATION TIPS (Part 1)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Facilitation</div>
+    <div class="page-title">Facilitation tips for the panel</div>
+    <p class="page-subtitle">How to deliver with confidence, handle curveballs, and read the room.</p>
+
+    <h3 style="margin-top: 0.08in;">Opening with impact</h3>
+    <ul class="bullet-list">
+      <li><strong>Lead with the customer problem, not the lab title.</strong> The panel should feel the urgency of the problem before they hear your solution. "Imagine your customer asks..." is stronger than "Today I'll present..."</li>
+      <li><strong>Make eye contact, not slide contact.</strong> You know this material. Refer to the document occasionally, but speak to the panel as if you're having a conversation, not reading a report.</li>
+      <li><strong>Set expectations early.</strong> "I'll spend about eight minutes on the overview, then walk through each section in detail. I'm happy to go deeper on anything along the way." This gives the panel permission to interrupt, which makes the session more natural.</li>
+    </ul>
+
+    <hr class="divider">
+
+    <h3>Collaborative whiteboarding</h3>
+    <p class="small">If the panel has a whiteboard available, consider drawing the four-box architecture diagram live instead of just referencing the document. This demonstrates teaching skill and creates engagement.</p>
+
+    <div class="two-col" style="margin-top: 0.06in;">
+      <div class="info-box info-box--cyan">
+        <div class="info-box-label" style="color: #0E7490;">When to whiteboard</div>
+        <p>If the panel asks a question about how the layers connect, or if you sense they'd benefit from a visual. Don't force it; let it emerge naturally from the conversation.</p>
+      </div>
+      <div class="info-box info-box--amber">
+        <div class="info-box-label" style="color: #B45309;">When not to whiteboard</div>
+        <p>If you're running behind on time or the panel seems content with the document's diagrams. A whiteboard that slows things down hurts more than it helps.</p>
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <h3>Demo confidence dos and don'ts</h3>
+    <div class="two-col">
+      <div>
+        <h4 style="color: var(--color-emerald);">Do</h4>
+        <ul class="bullet-list bullet-list--green">
+          <li>Speak about the lab as if you've run it before</li>
+          <li>Reference specific code samples by name</li>
+          <li>Use phrases like "in my experience" or "what I've found works"</li>
+          <li>Anticipate follow-up questions and address them preemptively</li>
+          <li>Pause briefly after making a key point to let it land</li>
+        </ul>
+      </div>
+      <div>
+        <h4 style="color: var(--color-rose);">Don't</h4>
+        <ul class="bullet-list">
+          <li style="--bullet-color: var(--color-rose);">Apologize for what's not included</li>
+          <li>Say "I would have liked to add..." without explaining why you didn't</li>
+          <li>Rush through the reasoning section; it's where your judgment shows</li>
+          <li>Read code blocks verbatim; summarize what they do instead</li>
+          <li>Fill silence with filler words; embrace brief pauses</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 13: FACILITATION TIPS (Part 2)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Facilitation (continued)</div>
+    <div class="page-title">Handling deep technical questions</div>
+
+    <h3 style="margin-top: 0.06in;">The "production delta" framework</h3>
+    <p class="small">When asked about production readiness or real-world deployment, use this three-step framework:</p>
+
+    <div class="info-box info-box--blue" style="margin-top: 0.06in;">
+      <div class="info-box-label" style="color: var(--color-primary);">Step 1: Acknowledge the gap</div>
+      <p>"You're right that the lab uses [lab simplification]. That's a deliberate trade-off for a 60-90 minute session."</p>
+    </div>
+    <div class="info-box info-box--cyan">
+      <div class="info-box-label" style="color: #0E7490;">Step 2: Name the production requirement</div>
+      <p>"In production, you'd need [specific production requirement]: [brief explanation of what it adds]."</p>
+    </div>
+    <div class="info-box info-box--green">
+      <div class="info-box-label" style="color: var(--color-emerald);">Step 3: Bridge to the lab's teaching value</div>
+      <p>"The lab teaches the core pattern and explicitly calls out the production delta so SEs can have that conversation with customers confidently."</p>
+    </div>
+
+    <h3 style="margin-top: 0.12in;">Reading the room</h3>
+    <table class="data-table" style="font-size: 9pt;">
+      <thead>
+        <tr><th>Signal</th><th>What it means</th><th>How to respond</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Panel member leans forward, nods</td>
+          <td>Engaged, wants more detail</td>
+          <td>Go deeper on the current point; offer a specific example</td>
+        </tr>
+        <tr>
+          <td>Panel member looks at the clock</td>
+          <td>Pacing concern</td>
+          <td>Summarize current section and move on: "Let me jump to the key takeaway here..."</td>
+        </tr>
+        <tr>
+          <td>Multiple panel members exchange glances</td>
+          <td>They have a question or concern</td>
+          <td>Pause and invite: "I see some interest&mdash;what's on your mind?"</td>
+        </tr>
+        <tr>
+          <td>Panel member interrupts with a question</td>
+          <td>High engagement (this is good)</td>
+          <td>Answer concisely, then bridge back: "Great question. The short answer is... Let me show you how that plays out in Section X."</td>
+        </tr>
+        <tr>
+          <td>Long silence after a question</td>
+          <td>They're processing or unsatisfied</td>
+          <td>Add one more layer of detail or ask: "Would it be helpful if I went deeper on that?"</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <hr class="divider">
+
+    <h3>Managing energy and presence</h3>
+    <div class="two-col">
+      <div>
+        <ul class="bullet-list">
+          <li><strong>First three minutes set the tone.</strong> If you start confident and clear, the panel gives you the benefit of the doubt for the rest</li>
+          <li><strong>Vary your pace.</strong> Slow down for key points, speed up for housekeeping details. Monotone kills engagement</li>
+          <li><strong>Use the document as a prop, not a crutch.</strong> "If you look at page 6, you'll see the code sample..." then look up and explain it</li>
+        </ul>
+      </div>
+      <div>
+        <ul class="bullet-list">
+          <li><strong>When you're nervous, focus on one panelist.</strong> Make eye contact, deliver a point, then shift to the next person. This feels like a conversation, not a performance</li>
+          <li><strong>Drink water.</strong> Seriously. Dry mouth makes you talk faster and less clearly. Take a sip during transitions</li>
+          <li><strong>Your closing is pre-written.</strong> No matter how the Q&amp;A goes, you end strong. That's the last impression they take away</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 14: BACKUP DEEP-DIVES (Part 1)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Backup material</div>
+    <div class="page-title">Deep-dive extensions</div>
+    <p class="page-subtitle">Ready-to-deploy material if Q&amp;A goes deep on specific topics. You likely won't need all of these.</p>
+
+    <h3 style="margin-top: 0.08in;">Streamable HTTP vs. stdio</h3>
+    <div class="info-box info-box--cyan">
+      <div class="info-box-label" style="color: #0E7490;">If asked to go deeper on transport choices</div>
+      <p><strong>stdio:</strong> Client spawns server as a subprocess. Zero network setup, no auth needed. Great for local tools and development. Limitation: single client, server lifecycle tied to client.</p>
+      <p style="margin-top: 0.04in;"><strong>Streamable HTTP:</strong> Server runs independently at a URL. Supports multiple clients, sessions, and server-initiated events. Requires auth (typically OAuth 2.1) and Origin validation. This is the production transport for remote MCP servers.</p>
+      <p style="margin-top: 0.04in;"><strong>The SSE question:</strong> Server-Sent Events as a standalone transport is deprecated in favor of Streamable HTTP. If anyone mentions SSE, note that Streamable HTTP subsumes it with better session management and bidirectional communication.</p>
+    </div>
+
+    <h3 style="margin-top: 0.1in;">Multi-tool discovery and filtering</h3>
+    <div class="info-box info-box--blue">
+      <div class="info-box-label" style="color: var(--color-primary);">If asked about scaling beyond one tool</div>
+      <p>In production, MCP servers expose multiple tools. The agent discovers all available tools via the <code>tools/list</code> method. Tool filtering is controlled server-side: the server can restrict which tools a given client sees based on auth context, user role, or explicit configuration. This is how enterprise governance works at the tool level.</p>
+      <p style="margin-top: 0.04in;">The lab uses one tool because it teaches the full discovery-call-validate cycle. Adding a second tool (e.g., a ticketing system) doesn't introduce new concepts; it demonstrates the pattern scales. That's why it's a v3 stretch goal, not a v1 requirement.</p>
+    </div>
+
+    <h3 style="margin-top: 0.1in;">Evaluation frameworks for MCP integrations</h3>
+    <div class="info-box info-box--green">
+      <div class="info-box-label" style="color: var(--color-emerald);">If asked about measuring integration quality</div>
+      <p>For POV-stage conversations, SEs can use three evaluation dimensions:</p>
+      <p style="margin-top: 0.04in;"><strong>Relevance:</strong> Do the top-k results match the query intent? Measured by precision@k against a golden set of queries and expected results.</p>
+      <p style="margin-top: 0.04in;"><strong>Grounding:</strong> Does the agent's answer reference returned documents? Measured by citation presence and factual alignment with source snippets.</p>
+      <p style="margin-top: 0.04in;"><strong>Governance:</strong> Does the system respect permission boundaries? Measured by confirming that results with restricted <code>acl_group</code> values are filtered for unauthorized users.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 15: BACKUP DEEP-DIVES (Part 2)
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Backup material (continued)</div>
+    <div class="page-title">More deep-dive extensions</div>
+
+    <h3 style="margin-top: 0.08in;">Competitive positioning</h3>
+    <div class="info-box info-box--amber">
+      <div class="info-box-label" style="color: #B45309;">If asked about competition</div>
+      <p><strong>vs. Custom SDKs:</strong> Every custom SDK is a maintenance burden. MCP replaces N integrations with one protocol. The ecosystem of pre-built MCP servers reduces time-to-value.</p>
+      <p style="margin-top: 0.04in;"><strong>vs. GraphQL gateways:</strong> GraphQL is a query language, not an agent protocol. MCP adds tool discovery, schema negotiation, and transport abstraction that GraphQL doesn't provide. They can coexist (MCP server backed by GraphQL).</p>
+      <p style="margin-top: 0.04in;"><strong>vs. Vendor-locked connectors:</strong> Proprietary connector frameworks create lock-in. MCP is an open standard, which reduces customer switching cost and increases trust. The competitive moat isn't the protocol; it's the implementation quality and ecosystem breadth.</p>
+    </div>
+
+    <h3 style="margin-top: 0.1in;">Self-service lab kit design</h3>
+    <div class="info-box info-box--blue">
+      <div class="info-box-label" style="color: var(--color-primary);">If asked about scaling without facilitators</div>
+      <p>The self-service kit would include:</p>
+      <p style="margin-top: 0.04in;"><strong>GitHub repo:</strong> All lab code, including the mock API Lambda, MCP server, and validation scripts. README with step-by-step instructions and screenshots.</p>
+      <p style="margin-top: 0.04in;"><strong>Infrastructure-as-code:</strong> Terraform or CDK template that provisions the Lambda, IAM role, and CloudWatch log group in one command. Teardown script included.</p>
+      <p style="margin-top: 0.04in;"><strong>Self-check script:</strong> A validation script that confirms each lab section was completed correctly (endpoint responds, tool is discoverable, query returns grounded answer). SEs run it at the end to confirm success.</p>
+      <p style="margin-top: 0.04in;"><strong>Video companion:</strong> 15-minute recorded walk-through of the facilitator completing the lab. SEs can reference it when stuck without waiting for a live session.</p>
+    </div>
+
+    <h3 style="margin-top: 0.1in;">Authorization model deep-dive</h3>
+    <div class="info-box info-box--cyan">
+      <div class="info-box-label" style="color: #0E7490;">If security team questions go deep</div>
+      <p>MCP's authorization model for HTTP transports follows OAuth 2.1 patterns. The server acts as a resource server, the client presents tokens scoped to specific tools and data sets. Key points:</p>
+      <p style="margin-top: 0.04in;"><strong>Origin validation:</strong> HTTP transport servers validate the Origin header to prevent unauthorized cross-origin tool calls.</p>
+      <p style="margin-top: 0.04in;"><strong>Tool-level scoping:</strong> Servers can expose different tool sets to different authenticated clients, enabling least-privilege access.</p>
+      <p style="margin-top: 0.04in;"><strong>Audit trail:</strong> Every tool call passes through the MCP layer with structured request/response logging, providing a natural audit surface.</p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 16: PANIC SHEET
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Emergency reference</div>
+    <div class="page-title">Panic sheet</div>
+    <p class="page-subtitle">"If X happens, do Y." Quick reference for common delivery mishaps.</p>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If you lose your train of thought mid-sentence</div>
+      <div class="panic-card-response">Pause. Take a breath. Say: <em>"Let me reframe that."</em> Then start the point fresh. A brief pause reads as thoughtfulness, not confusion.</div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If a panel member asks something you genuinely don't know</div>
+      <div class="panic-card-response">Say: <em>"That's a great question, and I want to be honest that I don't have a complete answer. Here's how I'd go about finding one: [describe process]. What I can tell you is [bridge to something related you do know]."</em></div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If you're running out of time and still have material left</div>
+      <div class="panic-card-response">Skip to your closing statement. A strong close matters more than complete coverage. Say: <em>"In the interest of time, let me jump to the key takeaway..."</em> and deliver your prepared close.</div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If a panel member challenges a design decision aggressively</div>
+      <div class="panic-card-response">Don't get defensive. Acknowledge: <em>"That's a valid concern. The reasoning was [explain]. If I were optimizing for [their concern], I'd adjust by [alternative]. What I prioritized here was [your priority] because [reason]."</em></div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If the panel seems disengaged or distracted</div>
+      <div class="panic-card-response">Ask a direct question: <em>"Before I move on, is there a specific area you'd like me to go deeper on?"</em> This resets engagement and gives you information about what they care about.</div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If technology fails (screen share drops, document won't open)</div>
+      <div class="panic-card-response">Stay calm. You know the material. Say: <em>"Let me describe what you'd be seeing on page X..."</em> and continue verbally while troubleshooting. The panel is evaluating you, not your screen share.</div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If the panel asks the same question twice (or a variation)</div>
+      <div class="panic-card-response">They didn't get a satisfactory answer the first time. Reframe your answer with a different angle or a concrete example. <em>"Let me come at that from a different angle..."</em></div>
+    </div>
+
+    <div class="panic-card">
+      <div class="panic-card-trigger">If you realize you made an error in something you said</div>
+      <div class="panic-card-response">Correct it immediately: <em>"Actually, let me correct myself on that point..."</em> Self-correction shows intellectual honesty and attention to accuracy. It's a positive signal.</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 17: PRE-SESSION CHECKLIST
+     ============================================================ -->
+<div class="page">
+  <div class="page-content">
+    <div class="section-label">Checklist</div>
+    <div class="page-title">Pre-session checklist</div>
+    <p class="page-subtitle">Complete before the panel session begins.</p>
+
+    <h3 style="margin-top: 0.08in;">Day before</h3>
+    <ul class="check-list">
+      <li>Review the full lab design document (14 pages) once through</li>
+      <li>Read through this presenter notes document once</li>
+      <li>Practice the opening hook out loud (30 seconds)</li>
+      <li>Practice the closing statement out loud (30 seconds)</li>
+      <li>Identify your 3 strongest talking points to emphasize</li>
+      <li>Review the Anticipated Q&amp;A section and rehearse 5 answers</li>
+      <li>Test screen sharing with the PDF document</li>
+      <li>Confirm video, audio, and internet connection quality</li>
+    </ul>
+
+    <h3 style="margin-top: 0.12in;">30 minutes before</h3>
+    <ul class="check-list">
+      <li>Close unnecessary applications and browser tabs</li>
+      <li>Open the lab design PDF and presenter notes PDF side by side</li>
+      <li>Have water within reach</li>
+      <li>Silence phone and notifications</li>
+      <li>Take five slow breaths to settle your nervous system</li>
+      <li>Remind yourself: you know this material deeply</li>
+    </ul>
+
+    <h3 style="margin-top: 0.12in;">During the session</h3>
+    <ul class="check-list">
+      <li>Start with the customer problem, not the lab title</li>
+      <li>Watch the clock at 8:00, 28:00, and 40:00 (transition points)</li>
+      <li>Keep Q&amp;A answers to 60-90 seconds</li>
+      <li>Bridge back to the lab's value after each question</li>
+      <li>Deliver the prepared closing statement no matter what</li>
+    </ul>
+
+    <hr class="divider">
+
+    <h3>Timing trigger points</h3>
+    <table class="data-table" style="font-size: 9pt;">
+      <thead>
+        <tr><th>Time</th><th>You should be at</th><th>If behind</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>8:00</strong></td><td>Finishing Part 1 (overview), transitioning to walk-through</td><td>Drop the bridge statement, go straight to section details</td></tr>
+        <tr><td><strong>16:00</strong></td><td>Finishing Sections 3-4 (API + MCP wiring)</td><td>Summarize Sections 5-6 instead of walking through detail</td></tr>
+        <tr><td><strong>28:00</strong></td><td>Finishing walk-through, opening Q&amp;A</td><td>If you haven't covered reasoning, work key trade-offs into Q&amp;A answers</td></tr>
+        <tr><td><strong>40:00</strong></td><td>Wrapping Q&amp;A, moving to close</td><td>Deliver closing statement immediately regardless of question queue</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PAGE 18: BACK COVER
+     ============================================================ -->
+<div class="page" style="page: back;">
+  <div class="page-content" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+
+    <div class="section-label" style="font-size: 10pt; margin-bottom: 0.15in;">Delivery summary</div>
+
+    <div style="max-width: 5.5in; text-align: center;">
+      <p style="font-size: 14pt; font-weight: 700; color: var(--color-slate-900); margin-bottom: 0.1in;">What a great delivery looks like</p>
+      <p class="text-muted" style="margin-bottom: 0.2in;">If the panel walks away thinking these things, you've succeeded.</p>
+    </div>
+
+    <div style="width: 2.5in; height: 2px; background: linear-gradient(to right, transparent, var(--color-primary), var(--color-cyan), transparent); margin: 0.2in 0;"></div>
+
+    <ul class="check-list" style="max-width: 5in; margin: 0.15in 0;">
+      <li>"They understand MCP at a level that would impress our engineering team"</li>
+      <li>"They designed for the SE learner, not for themselves"</li>
+      <li>"Every technical decision connected back to a customer outcome"</li>
+      <li>"They made smart trade-offs and could explain why"</li>
+      <li>"They handled tough questions with poise and honesty"</li>
+      <li>"They think about enablement as a program, not a one-off session"</li>
+      <li>"I'd trust them to run our technical enablement"</li>
+    </ul>
+
+    <div style="width: 2.5in; height: 2px; background: linear-gradient(to right, transparent, var(--color-primary), var(--color-cyan), transparent); margin: 0.2in 0;"></div>
+
+    <div style="max-width: 5in; text-align: center; margin-top: 0.15in;">
+      <div class="phrase-card" style="text-align: center; border-left: none; border-top: 3px solid var(--color-cyan);">
+        "One protocol. Many enterprise systems. Grounded answers. This lab gives SEs the hands-on confidence to demo, position, and troubleshoot MCP integrations with real customer impact."
+      </div>
+    </div>
+
+    <p style="font-size: 9pt; color: var(--color-slate-500); text-align: center; margin-top: 0.25in;">
+      Prepared by John Yzaguirre<br>
+      Technical Enablement Manager Assignment
+    </p>
+  </div>
+</div>
+
+</body>
+</html>
